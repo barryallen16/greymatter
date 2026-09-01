@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roadmaps — Grey Matter</title>
+<link rel="stylesheet" href="/static/css/tailwind.css">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/fonts.css">
+<style>
+  *{font-family:"Geist",sans-serif}.mono{font-family:"Geist Mono",monospace}.pixel{font-family:"GeistPixel","Geist",sans-serif;letter-spacing:-0.02em}
+  html{-webkit-text-size-adjust:100%} a{min-height:44px} @supports(padding:max(0px)){body{padding-top:env(safe-area-inset-top)}}
+</style>
+<!-- Favicon + website logo (no border) -->
+<link rel="icon" href="/favicon/favicon.ico" type="image/x-icon" />
+<link rel="icon" href="/favicon/favicon-32x32.png" sizes="32x32" type="image/png" />
+<link rel="icon" href="/favicon/favicon-16x16.png" sizes="16x16" type="image/png" />
+<link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png" />
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen">
+<div class="max-w-3xl mx-auto px-6 py-10">
+  <div class="flex gap-2 mb-6 overflow-x-auto">
+    <a href="../index.html" class="text-xs px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 flex items-center gap-2 shrink-0"><i data-lucide="file" class="w-4 h-4"></i> Docs</a>
+    <a href="../archive/" class="text-xs px-4 py-3 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-300 hover:bg-violet-500/20 flex items-center gap-2 shrink-0"><i data-lucide="archive" class="w-4 h-4"></i> Archive</a>
+  </div>
+  <h1 class="pixel text-2xl font-bold">Roadmaps</h1>
+  <p class="text-sm text-zinc-500 mono mt-1">One file per day · ticks saved in browser · nightly generation · works offline</p>
+  <div class="mt-6 space-y-3">
+    <a href="./2026-09-02.html" class="block rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4 hover:bg-emerald-500/20 active:scale-[0.98] transition-transform">
+      <div class="font-semibold flex items-center gap-2">2026-09-02 — Heap Day 1 <span class="text-xs font-normal bg-emerald-500 text-black px-2 py-0.5 rounded-full">TODAY</span></div>
+      <div class="text-xs text-zinc-400 mono mt-1 leading-relaxed">08:10 Heap (Kth Largest, Top K) · kaggle Dockerfile + Postgres/Redis · 3 apps (Type A/B/C/D) · MVP 2+1+30m</div>
+      <div class="text-xs text-emerald-400 mt-2">Tap to open →</div>
+    </a>
+    <div class="rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-500 flex items-center gap-3">
+      <i data-lucide="history" class="w-5 h-5 text-zinc-500 shrink-0"></i>
+      <span>Tomorrow auto-generated when you say “generate roadmap for 2026-09-03”</span>
+    </div>
+  </div>
+  <div class="mt-8 text-xs text-zinc-600 mono">
+    <p>Sources: daily-plan.md, fresher-must-have-skills-2026.md, career_advice_insights.md, aman.ai/code/heap, techinterviewhandbook.org</p>
+    <p class="mt-4 flex gap-2">
+      <a href="../index.html" class="px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 flex-1 text-center">Docs</a>
+      <a href="../archive/" class="px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 flex-1 text-center">Archive</a>
+    </p>
+  </div>
+</div>
+<script src="/static/js/pixel-icons.js"></script>
+<script>if(window.refreshIcons) refreshIcons();</script>
+</body>
+</html>

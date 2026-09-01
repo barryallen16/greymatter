@@ -1,0 +1,30 @@
+# Large raw data — kept for Pages (archive needs it); youtube csv still ignored
+youtube_urls.csv
+youtube_urls.txt
+
+# OS / IDE artifacts
+.DS_Store
+Thumbs.db
+__.pycache__
+*.pyc
+*.pyo
+
+# Local dev / secrets
+.env
+*.env.local
+
+# Docker / build tmp
+.dockerignore
+*.log
+
+# Node / Tailwind build artifacts (keep tailwind.css, ignore source map and modules)
+node_modules/
+npm-debug.log*
+package-lock.json
+
+# Roadmap temporaries
+roadmaps/*.tmp
+Grey Matter — Project Grey Matter.mhtml
+
+# Not required for Grey Matter deployment (analyzed in repo-analysis.md, not served)
+ats-resume-creation-skill/

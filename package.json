@@ -1,0 +1,19 @@
+{
+  "name": "grey-matter",
+  "version": "1.0.0",
+  "description": "Grey Matter — Static site: Docs + Roadmaps + Archive (5340 items). All tickboxes work on phone, persist in localStorage, no backend. Production Tailwind via /static/css/tailwind.css, no CDN. Served at greymatter.isroot.in + archive.isroot.in.",
+  "main": "tailwind.config.js",
+  "scripts": {
+    "build:css": "tailwindcss -i ./static/css/input.css -o ./static/css/tailwind.css --minify",
+    "watch:css": "tailwindcss -i ./static/css/input.css -o ./static/css/tailwind.css --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.20",
+    "autoprefixer": "^10.5.4",
+    "postcss": "^8.5.26",
+    "tailwindcss": "^3.4.17"
+  }
+}

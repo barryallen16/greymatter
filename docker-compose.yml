@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    container_name: grey-matter
+    ports:
+      - "8000:80"  # VPS: change to "80:80" or "443:443" with certbot (grey-matter.isroot.in + archive.isroot.in)
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3

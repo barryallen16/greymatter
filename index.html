@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grey Matter — Job Search Docs</title>
+<link rel="stylesheet" href="/static/css/tailwind.css">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- Favicon + website logo (no border) -->
+<link rel="icon" href="/favicon/favicon.ico" type="image/x-icon" />
+<link rel="icon" href="/favicon/favicon-32x32.png" sizes="32x32" type="image/png" />
+<link rel="icon" href="/favicon/favicon-16x16.png" sizes="16x16" type="image/png" />
+<link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png" />
+<link rel="stylesheet" href="/static/css/fonts.css">
+<style>
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 8px; }
+  ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+  html { scroll-behavior: smooth; }
+  .pixel{ font-family:"GeistPixel","Geist",sans-serif; letter-spacing:-0.02em }
+  .prose table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .prose pre { background: #18181b !important; border: 1px solid #3f3f46; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .prose code { font-family: 'Geist Mono', monospace; word-break: break-word; }
+  .prose :where(code):not(:where(pre code))::before,
+  .prose :where(code):not(:where(pre code))::after { content: none; }
+  .prose :where(code):not(:where(pre code)) {
+    background: #27272a; color: #a5f3fc; padding: .15em .4em;
+    border-radius: .375rem; font-weight: 500; font-size: .85em;
+  }
+  @supports(padding: max(0px)) {
+    header { padding-top: max(0.5rem, env(safe-area-inset-top)); }
+  }
+  @media (max-width: 1024px) {
+    .nav-btn { min-height: 44px; }
+  }
+  .prose img { max-width: 100%; height: auto; }
+  .prose { overflow-wrap: break-word; word-break: break-word; }
+  svg[data-pixel-icon], .pixel-icon-svg { shape-rendering: crispEdges; }
+</style>
+</head>
+<body class="h-full bg-zinc-950 text-zinc-200 antialiased">
+
+<div class="flex h-full">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full transform bg-zinc-900 border-r border-zinc-800 flex flex-col transition-transform duration-200 lg:static lg:translate-x-0">
+    <div class="px-5 pt-6 pb-4 border-b border-zinc-800">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+          <i data-lucide="file" class="w-5 h-5 text-emerald-400"></i>
+        </div>
+        <div>
+          <h1 class="pixel text-sm font-bold text-white leading-tight tracking-tight">Grey Matter</h1>
+          <p class="mono text-[11px] text-zinc-500">barryallen16 · Sep 2026 · Geist Pixel · Job Search Docs</p>
+        </div>
+      </div>
+    </div>
+
+    <nav id="nav" class="flex-1 overflow-y-auto px-3 py-4 space-y-1"></nav>
+
+    <div class="px-3 py-3 border-y border-zinc-800 space-y-2">
+      <a href="./roadmaps/" class="flex items-center gap-2.5 px-3 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15 transition-colors">
+        <i data-lucide="clock" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+        <span class="pixel text-sm font-semibold text-emerald-300">Roadmaps</span>
+        <span class="ml-auto text-xs text-emerald-400/70">→</span>
+      </a>
+      <a href="./archive/" class="flex items-center gap-2.5 px-3 py-3 rounded-xl bg-violet-500/10 border border-violet-500/20 hover:bg-violet-500/15 transition-colors">
+        <i data-lucide="archive" class="w-4 h-4 text-violet-400 shrink-0"></i>
+        <span class="pixel text-sm font-semibold text-violet-300">Archive</span>
+        <span class="text-[11px] mono text-violet-400/70 ml-auto">5340</span>
+        <span class="text-xs text-violet-400/70">→</span>
+      </a>
+    </div>
+
+    <div class="px-5 py-4 border-t border-zinc-800">
+      <p class="text-[11px] text-zinc-600 leading-relaxed">Host on VPS · <code class="text-zinc-500">docker compose up</code> · works on phone + laptop</p>
+    </div>
+  </aside>
+
+  <!-- mobile backdrop -->
+  <div id="backdrop" class="fixed inset-0 z-30 bg-black/60 hidden lg:hidden"></div>
+
+  <!-- ============ MAIN ============ -->
+  <main class="flex-1 lg:ml-0 min-w-0 flex flex-col">
+
+    <!-- top bar -->
+    <header class="sticky top-0 z-20 flex items-center gap-3 px-4 sm:px-8 h-14 bg-zinc-950/80 backdrop-blur border-b border-zinc-800" style="padding-top: env(safe-area-inset-top);">
+      <button id="menuBtn" class="lg:hidden -ml-2 p-3 rounded-xl hover:bg-zinc-800 text-zinc-400 min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Open menu">
+        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+      </button>
+      <span id="crumb" class="text-sm text-zinc-400 truncate"></span>
+      <span id="statusDot" class="hidden sm:inline-flex ml-auto items-center gap-1.5 text-xs text-zinc-500">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> live
+      </span>
+      <a href="./roadmaps/" class="lg:hidden ml-auto p-2.5 rounded-xl bg-emerald-500 text-black text-xs font-bold min-h-[36px] flex items-center">Today</a>
+    </header>
+
+    <!-- content -->
+    <div id="scrollArea" class="flex-1 overflow-y-auto">
+      <article id="content" class="prose prose-invert prose-zinc max-w-4xl mx-auto px-4 sm:px-8 py-10 prose-headings:font-bold prose-a:text-emerald-400 prose-strong:text-white prose-th:bg-zinc-900 prose-th:text-zinc-100 prose-blockquote:border-emerald-500/40 prose-blockquote:text-zinc-400 prose-hr:border-zinc-800"></article>
+
+      <!-- error / help card -->
+      <div id="errorCard" class="hidden max-w-xl mx-auto my-24 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-8 text-center">
+        <div class="flex justify-center mb-4"><i data-lucide="lock" class="w-10 h-10 text-amber-400"></i></div>
+        <h2 class="text-lg font-bold text-amber-300 mb-2">Can't load the markdown files</h2>
+        <p class="text-sm text-zinc-400 mb-5">Browsers block <code>fetch()</code> on <code>file://</code> URLs. Serve this folder over HTTP:</p>
+        <div class="bg-zinc-900 rounded-lg p-4 font-mono text-sm text-emerald-300 text-left mb-3">python -m http.server 8000</div>
+        <p class="text-xs text-zinc-500">Then open <span class="text-zinc-300">http://localhost:8000/index.html</span></p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/static/js/pixel-icons.js"></script>
+<script>
+  // ── Add new .md files here ───────────────────────────────
+  const DOCS = [
+    { file: 'daily-plan.md',                 icon: 'clock',         label: 'Daily Plan',          desc: 'Schedule + 90-day roadmap' },
+    { file: 'ideas.md',                      icon: 'zap',           label: 'Ideas',               desc: '19 ideas ranked brutal' },
+    { file: 'ideas_ranking.md',              icon: 'shield-check',  label: 'Ideas Ranking',       desc: 'Resume-worthy ranking' },
+    { file: 'repo-analysis.md',              icon: 'terminal',      label: 'Repo Analysis',       desc: 'Audit of all 34 repos' },
+    { file: 'roles-and-job-search-focus.md', icon: 'network',       label: 'Roles & Focus',       desc: 'What to apply for, priorities' },
+    { file: 'job-search-research.md',        icon: 'info',          label: 'Research Notes',      desc: 'Market research Chennai 2026' },
+    { file: 'fresher-must-have-skills-2026.md', icon: 'file',       label: 'Must-Have Skills', desc: '>₹5 LPA no-bond blueprint' },
+    { file: 'career_advice_insights.md',     icon: 'activity',      label: 'Career Insights',     desc: '524 advices distilled' },
+  ];
+  // ──────────────────────────────────────────────────────────
+
+  const nav = document.getElementById('nav');
+  const content = document.getElementById('content');
+  const crumb = document.getElementById('crumb');
+  const errorCard = document.getElementById('errorCard');
+  const cache = {};
+  let activeFile = null;
+
+  marked.setOptions({ gfm: true, breaks: false });
+
+  // build nav
+  DOCS.forEach((doc, i) => {
+    const btn = document.createElement('button');
+    btn.dataset.file = doc.file;
+    btn.className = 'nav-btn w-full text-left rounded-xl px-3 py-3 transition-colors group min-h-[52px] flex items-center';
+    btn.innerHTML = `
+      <div class="flex items-start gap-3">
+        <i data-lucide="${doc.icon}" class="w-4 h-4 text-zinc-400 mt-0.5 shrink-0"></i>
+        <span class="min-w-0 flex-1 text-left">
+          <span class="block text-sm font-semibold text-zinc-200 group-hover:text-white leading-tight">${doc.label}</span>
+          <span class="block text-[11px] text-zinc-500 leading-tight">${doc.desc}</span>
+        </span>
+      </div>`;
+    btn.addEventListener('click', () => loadDoc(doc));
+    nav.appendChild(btn);
+  });
+  if (window.refreshIcons) refreshIcons(nav);
+
+  function setActive(file) {
+    document.querySelectorAll('.nav-btn').forEach(b => {
+      const on = b.dataset.file === file;
+      b.classList.toggle('bg-emerald-500/10', on);
+      b.classList.toggle('border', on);
+      b.classList.toggle('border-emerald-500/40', on);
+      b.classList.toggle('hover:bg-zinc-800', !on);
+      b.classList.toggle('bg-transparent', !on);
+      b.classList.toggle('border-transparent', !on);
+    });
+  }
+
+  async function loadDoc(doc, pushHash = true) {
+    if (pushHash) location.hash = encodeURIComponent(doc.file);
+    activeFile = doc.file;
+    setActive(doc.file);
+    crumb.textContent = doc.label + ' — ' + doc.file;
+    closeSidebar();
+
+    if (cache[doc.file]) return render(cache[doc.file]);
+
+    status(true);
+    try {
+      const res = await fetch(doc.file);
+      if (!res.ok) throw new Error(res.status);
+      const md = await res.text();
+      cache[doc.file] = md;
+      errorCard.classList.add('hidden');
+      render(md);
+    } catch (e) {
+      content.innerHTML = '';
+      errorCard.classList.remove('hidden');
+      if (window.refreshIcons) refreshIcons(errorCard);
+    } finally {
+      status(false);
+    }
+    document.getElementById('scrollArea').scrollTop = 0;
+  }
+
+  function render(md) {
+    content.innerHTML = marked.parse(md);
+  }
+
+  function status(busy) {
+    const dot = document.querySelector('#statusDot span');
+    dot.className = busy
+      ? 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse'
+      : 'w-1.5 h-1.5 rounded-full bg-emerald-500';
+  }
+
+  // mobile sidebar
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('backdrop');
+  document.getElementById('menuBtn').addEventListener('click', () => {
+    sidebar.classList.remove('-translate-x-full');
+    backdrop.classList.remove('hidden');
+  });
+  function closeSidebar() {
+    if (window.innerWidth < 1024) {
+      sidebar.classList.add('-translate-x-full');
+      backdrop.classList.add('hidden');
+    }
+  }
+  backdrop.addEventListener('click', () => closeSidebar());
+
+  // deep-linking: #repo-analysis.md etc.
+  window.addEventListener('hashchange', routeFromHash);
+  function routeFromHash() {
+    const name = decodeURIComponent(location.hash.slice(1));
+    const doc = DOCS.find(d => d.file === name) || DOCS[0];
+    loadDoc(doc, false);
+    setActive(doc.file);
+  }
+
+  routeFromHash();
+  if (window.refreshIcons) refreshIcons(document.body);
+</script>
+</body>
+</html>
