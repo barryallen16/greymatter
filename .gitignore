@@ -1,4 +1,8 @@
-# Large raw data — kept for Pages (archive needs it); youtube csv still ignored
+# Large raw data — VPS only, never in git (4.8M each, contains secrets) — scp to VPS
+results.jsonl
+results.enriched.jsonl
+archive/results.jsonl
+archive/results.enriched.jsonl
 youtube_urls.csv
 youtube_urls.txt
 
