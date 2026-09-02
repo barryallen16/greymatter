@@ -1,8 +1,4 @@
-# Large raw data — VPS only, never in git (4.8M each, contains secrets) — scp to VPS
-results.jsonl
-results.enriched.jsonl
-archive/results.jsonl
-archive/results.enriched.jsonl
+# Large raw data — kept for Pages (archive needs 4.8M, token redacted) — needed at greymatter.isroot.in/archive
 youtube_urls.csv
 youtube_urls.txt
 
