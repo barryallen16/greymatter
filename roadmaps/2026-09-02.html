@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../static/css/fonts.css">
 <style>
+</style>
 <!-- Favicon + website logo (no border) -->
 <link rel="icon" href="../favicon/favicon.ico" type="image/x-icon" />
 <link rel="icon" href="../favicon/favicon-32x32.png" sizes="32x32" type="image/png" />
@@ -79,42 +80,29 @@
     </div>
   </section>
 
-  <!-- TIMELINE -->
+  <!-- TIMELINE — LATE START 13:22 -->
   <section class="space-y-3">
-
-    <div class="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
-      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-zinc-800 px-2 py-0.5 rounded">07:00</span> Wake — no phone <span class="ml-auto text-zinc-500">40m</span></div>
-      <label class="flex gap-3 mt-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="wake"><span class="text-sm">Water, 20m walk/run + shower. Phone stays outside bedroom.</span></label>
+    <div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-amber-500 text-black px-2 py-0.5 rounded">13:22 NOW</span> Late start <span class="ml-auto text-amber-400">shifted</span></div>
+      <p class="text-sm mt-2">You start at <strong>13:22</strong>. Morning 07:00–13:05 is marked <em>skipped</em> — don't guilt-spiral. Do the remaining blocks only. MVP is still <strong>2 heap + 1 commit + 1 app</strong> — heap missed today: do <strong>1 heap at 14:00</strong> inside Project 2 time, or at 18:15 if you run out.</p>
     </div>
 
-    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-emerald-500 text-black px-2 py-0.5 rounded">08:10–09:40</span> DSA 1 — Learn Heap <span class="ml-auto text-emerald-400">90m</span></div>
-      <div class="space-y-2 mt-3">
-        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="heap_read"><span class="text-sm"><strong>Read (15m):</strong> <a href="https://aman.ai/code/heap/" target="_blank" class="text-emerald-400 underline">aman.ai — Heap</a> and <a href="https://www.techinterviewhandbook.org/algorithms/heap/" target="_blank" class="text-emerald-400 underline">Tech Interview Handbook — Heap</a> — heapify, push/pop O(log n), heapq</span></label>
-        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="heap_video"><span class="text-sm"><strong>Watch ONE (20m max):</strong> <a href="https://www.youtube.com/watch?v=t0Cq6tVNRBA" target="_blank" class="text-emerald-400 underline">Abdul Bari — Heaps</a> OR <a href="https://www.youtube.com/watch?v=wptevk0bshY" target="_blank" class="text-emerald-400 underline">NeetCode — Heap / Priority Queue</a> — then code <code class="mono text-xs bg-zinc-800 px-1 rounded">heapq.heappush / heappop</code> once from memory</span></label>
-        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="heap_kth"><span class="text-sm"><strong>Solve:</strong> <a href="https://leetcode.com/problems/kth-largest-element-in-an-array/" target="_blank" class="text-emerald-400 underline">Kth Largest Element</a> — 25m cap → editorial → re-implement clean</span></label>
-        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="heap_topk"><span class="text-sm"><strong>Solve:</strong> <a href="https://leetcode.com/problems/top-k-frequent-elements/" target="_blank" class="text-emerald-400 underline">Top K Frequent Elements</a> — write time O(n log k) space O(n) in comment</span></label>
+    <details class="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4 opacity-60">
+      <summary class="text-xs font-semibold mono cursor-pointer text-zinc-500">07:00–13:05 — SKIPPED (late start) — tap to expand</summary>
+      <div class="mt-3 space-y-3">
+        <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-zinc-800 px-2 py-0.5 rounded">07:00</span> Wake — no phone <span class="ml-auto text-zinc-500">40m</span></div>
+        <label class="flex gap-3 mt-2 cursor-pointer opacity-50"><input type="checkbox" class="tick mt-1" data-id="wake" disabled><span class="text-sm line-through">Water, 20m walk/run + shower.</span></label>
+        <div class="flex gap-2 text-xs font-semibold mono mt-3"><span class="bg-zinc-800 px-2 py-0.5 rounded">08:10–09:40</span> DSA 1 — Learn Heap <span class="ml-auto text-zinc-500">90m — SKIPPED</span></div>
+        <label class="flex gap-3 mt-2 cursor-pointer opacity-50"><input type="checkbox" class="tick mt-1" data-id="heap_read" disabled><span class="text-sm line-through">Read aman.ai heap</span></label>
+        <label class="flex gap-3 cursor-pointer opacity-50"><input type="checkbox" class="tick mt-1" data-id="heap_video" disabled><span class="text-sm line-through">Watch heap video</span></label>
+        <label class="flex gap-3 cursor-pointer opacity-50"><input type="checkbox" class="tick mt-1" data-id="heap_kth" disabled><span class="text-sm line-through">Kth Largest</span></label>
+        <label class="flex gap-3 cursor-pointer opacity-50"><input type="checkbox" class="tick mt-1" data-id="heap_topk" disabled><span class="text-sm line-through">Top K</span></label>
+        <div class="flex gap-2 text-xs font-semibold mono mt-3"><span class="bg-zinc-800 px-2 py-0.5 rounded">09:55–11:25</span> DSA 2 — Redo <span class="ml-auto text-zinc-500">SKIPPED</span></div>
+        <div class="flex gap-2 text-xs font-semibold mono mt-3"><span class="bg-zinc-800 px-2 py-0.5 rounded">11:35–13:05</span> Project 1 — Fix AI-slop <span class="ml-auto text-zinc-500">SKIPPED — do tomorrow</span></div>
       </div>
-    </div>
+    </details>
 
-    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-emerald-500 text-black px-2 py-0.5 rounded">09:55–11:25</span> DSA 2 — Redo <span class="ml-auto text-zinc-500">90m</span></div>
-      <div class="space-y-2 mt-3">
-        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="redo"><span class="text-sm"><strong>Redo yesterday's failed problem from scratch</strong> — blank editor, no peeking. If you skipped yesterday, redo the harder heap one again.</span></label>
-        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="edgecases"><span class="text-sm">Test each solution: empty, single element, duplicate, large input. Speak your logic out loud — no silent coding.</span></label>
-      </div>
-    </div>
-
-    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-blue-500 text-white px-2 py-0.5 rounded">11:35–13:05</span> Project 1 — Fix AI-slop <span class="ml-auto text-blue-300">90m</span></div>
-      <div class="space-y-2 mt-3">
-        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="proj_read"><span class="text-sm"><strong>Slow-read</strong> your <code class="mono text-xs bg-zinc-800 px-1 rounded">fitcheck-website/src/services/groqService.ts</code> — find 3 bugs: fake 12-18s sleep, retry not feeding rejected pair, prompt not forcing strict JSON. This is Type B prep.</span></label>
-        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="proj_fix"><span class="text-sm"><strong>Fix one:</strong> delete the fake sleep, run <code class="mono text-xs bg-zinc-800 px-1 rounded">npm run dev</code> and confirm it still works</span></label>
-        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="proj_why"><span class="text-sm"><strong>Write Type C answer (3 lines):</strong> Why FastAPI not Flask? Why in-browser FashionCLIP vs API call? What would you do differently now? — say it aloud once.</span></label>
-      </div>
-    </div>
-
-    <div class="rounded-xl border border-zinc-800 bg-zinc-900/30 p-3 text-xs text-zinc-500 mono text-center">13:05–14:00 Lunch — actually rest, no screen</div>
+    <div class="rounded-xl border border-amber-500/30 bg-zinc-900 p-3 text-xs text-zinc-500 mono text-center">13:22–14:00 Late lunch — actually rest, no screen (38m) — then start</div>
 
     <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
       <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-blue-500 text-white px-2 py-0.5 rounded">14:00–15:30</span> Project 2 — Ship kaggle-automation <span class="ml-auto text-blue-300">90m</span></div>
@@ -185,7 +173,7 @@
 
 <script>
   const KEY='roadmap-2026-09-02';
-  const checks=document.querySelectorAll('.tick');
+  const checks=document.querySelectorAll('.tick:not([disabled])');
   document.getElementById('totalCount').textContent=checks.length;
   document.getElementById('dateStr').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'});
   function load(){
