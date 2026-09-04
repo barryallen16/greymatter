@@ -213,24 +213,24 @@ When reading job postings on Naukri, LinkedIn, or company portals, use this decr
 |---|---|---|
 | **Data Structures & Algorithms** | 🔴 **Hard Filter** | Solve 2 LeetCode Medium problems in 45 mins with optimal time/space complexity. |
 | **1 Core Language (Java/Python/C++)** | 🔴 **Hard Filter** | Syntax fluency + memory model + standard library/collections manipulation. |
-| **SQL & Relational DBs** | 🔴 **Hard Filter** | Write complex multi-table joins, subqueries, and window functions on a live whiteboard/IDE. |
+| **SQL & Relational DBs** | 🔴 **Hard Filter** | Write complex multi-table joins, subqueries, `HAVING`, and window functions on a live whiteboard/IDE — 5–6h + Murder Mystery. Resource: your archive "SQL (Most important. No shortcuts.)" roadmap screenshot for the topic list. |
 | **Git & GitHub** | 🔴 **Hard Filter** | Clone, branch, commit, push, resolve merge conflicts, open PRs on GitHub. |
 | **Object-Oriented Programming (OOP)** | 🔴 **Hard Filter** | Explain and implement Inheritance, Polymorphism, Encapsulation, Abstraction, and SOLID. |
-| **REST APIs** | 🔴 **Hard Filter** | Build CRUD endpoints, parse JSON, handle HTTP status codes (200, 201, 400, 401, 404, 500). |
+| **REST APIs** | 🔴 **Hard Filter** | Build CRUD endpoints, parse JSON, handle HTTP status codes (200, 201, 400, 401, 404, 500). Plus: auth headers (Bearer/JWT) + pagination (`limit`/`offset`) — 2h total. Resource: [REST Basics & Best Practices, Hayk Simonyan](https://youtube.com/watch?v=DkSeXHS0kAQ) via yt-ssf. |
 | **Operating Systems Fundamentals** | 🔴 **Hard Filter (GCCs/Product)** | Explain Threads vs Processes, Virtual Memory, Deadlocks, Context Switching. |
 | **Computer Networks** | 🔴 **Hard Filter (GCCs/Product)** | Explain TCP handshake, HTTP vs HTTPS, DNS resolution flow, WebSockets. |
-| **Docker / Containerization** | 🟢 **Differentiator** | Write a working `Dockerfile` to containerize your backend app and run it locally. |
+| **Docker / Containerization** | 🟢 **Differentiator** | Write a working `Dockerfile` to containerize your backend app and run it locally. Plus: volumes + port mapping (`-p`, 30 min) — 4–5h total. Resources: [aman.ai Docker — Run the Container](https://aman.ai/infra/docker/#step-3-run-the-docker-container) + [Docker in 2026, ByteMonk](https://youtube.com/watch?v=T1nFYnonON8) via yt-ssf. |
 | **Redis / Caching** | 🟢 **Differentiator** | Explain why caching is needed, implement Redis cache-aside pattern or rate limiting. |
 | **Automated Testing (Unit/Integration)** | 🟢 **Differentiator** | Write 10–20 unit tests with `pytest` (Python) or `JUnit/Mockito` (Java) in your GitHub repo. |
 | **LLM RAG Pipeline** | 🟢 **Differentiator (AI Roles)** | Build an end-to-end pipeline with embeddings, vector search, and contextual prompt generation. |
 | **GitHub Actions / CI/CD** | 🟢 **Differentiator** | Add a simple `.github/workflows/ci.yml` that runs linter and unit tests on push. |
 | **Low-Level Design (LLD)** | 🟢 **Differentiator (Zoho/Freshworks)** | Model a multi-class system (e.g. Parking Lot, Elevator) using clean OOP and Design Patterns. |
-| **Linux Command Line** | 🟡 **Flexible** | Know 15 basic terminal commands (`cd`, `ls`, `grep`, `find`, `cat`, `curl`, `chmod`, `ps`, `kill`, `ssh`). |
-| **Cloud (AWS / GCP / Azure)** | 🟡 **Flexible** | Understand S3 buckets, EC2 virtual machines, and deployed one app to a free cloud tier. |
+| **Linux Command Line** | 🟡 **Flexible** | Know 15 basic terminal commands (`cd`, `ls`, `grep`, `find`, `cat`, `curl`, `chmod`, `ps`, `kill`, `ssh`) + `tail -f` logs + `ps/kill/pkill` for nohup jobs — 3–4h total. Practice: OverTheWire Bandit Level 0–5 (2h play, proven by your own screenshot archive). |
+| **Cloud (AWS / GCP / Azure)** | 🟡 **Flexible** | Understand S3 buckets, EC2 virtual machines, and **IAM = identity/access management (users, roles, policies — NOT file permissions)**. Launch EC2 + put a file in S3 + attach a role — 4h free-tier total. Resource: your archive "Data Engineering on Cloud" roadmap (object storage/compute/warehouse/IAM/cost). |
 | **NoSQL (MongoDB / Cassandra)** | 🟡 **Flexible** | Know document model basics and when to pick SQL vs NoSQL (CAP theorem trade-offs). |
 | **TypeScript** | 🟡 **Flexible (Frontend/Fullstack)** | Understand basic typing, interfaces, generics; transition from JS in 1 week. |
 | **Message Queues (Kafka / RabbitMQ)** | 🟡 **Flexible** | Understand Publisher/Subscriber model, asynchronous processing, decoupling. |
-| **Kubernetes (K8s)** | ⚪ **Recruiter Bluff** | Freshers are NEVER expected to manage production K8s clusters. Just know what a Pod and Service are. |
+| **Kubernetes (K8s)** | ⚪ **Recruiter Bluff** | Freshers are NEVER expected to manage production K8s clusters. Just know what a Pod and Service are — 3h theory max, never a project. Resource: your saved "Explain kubernetes" ChatGPT screenshot in archive + [Docker Vs K8s, Sheryians](https://youtube.com/watch?v=oyjGMFzKgVQ) via yt-ssf. |
 | **Microservices Architecture** | ⚪ **Recruiter Bluff** | Know theoretical service communication (REST/gRPC/Kafka); building monoliths with clean layers is 100% fine. |
 | **System Architecture at Scale (HLD)** | ⚪ **Recruiter Bluff** | Freshers are rarely grilled on sharding/multi-region CDNs; focus on LLD (classes/objects). |
 | **2+ Years Experience Required** | ⚪ **Recruiter Bluff** | Standard template copy-paste. If the role says "Entry Level / Associate / Fresher", apply anyway. |
@@ -384,5 +384,31 @@ Recruiters and hiring managers in 2026 spend **less than 15 seconds** scanning a
 | **Contract Awareness** | Signs 2–3 year bond blindly without reading offer letter fine print | Demands clear CTC breakdown and strictly selects zero-bond product / GCC roles |
 
 ---
+
+## 10. Bare-Minimum Resources (verified live, Sep 2026)
+
+Your own indexes, queried Sep 4 2026 — use these before Googling:
+
+**Live endpoints (same box):** Meilisearch `https://adhi.isroot.in` (`/health → {"status":"available"}`) · [yt-ssf demo](https://barryallen16.github.io/yt-ssf/) (subscription-feed videos) · [aman.ai-search demo](https://barryallen16.github.io/aman.ai-search/) (20,595 aman.ai sections, deep anchor links)
+
+| Need | Best source | Link / query |
+|---|---|---|
+| Heap video | yt-ssf (28 hits) | [Heaps & Priority Queues — Greg Hogg](https://youtube.com/watch?v=E2v9hBgG6gE) |
+| Heap revision | archive (25 matches) | "Binary Heaps Insert Operation" screenshot (percolate-up) |
+| Docker run/build | aman.ai + yt-ssf (200 hits) | [aman.ai Docker Step 3](https://aman.ai/infra/docker/#step-3-run-the-docker-container) + [Docker in 2026 — ByteMonk](https://youtube.com/watch?v=T1nFYnonON8) |
+| K8s theory | archive (15) | saved "Explain kubernetes" ChatGPT screenshot |
+| Linux hands-on | archive (43) | Bandit Level 0–5 + `ps/kill/pkill` nohup note |
+| REST | yt-ssf (112) | [REST Basics — Hayk Simonyan](https://youtube.com/watch?v=DkSeXHS0kAQ) |
+| SQL topics | archive (117) | "SQL (Most important. No shortcuts.)" roadmap screenshot |
+| Bias/variance | aman.ai | [Bias/Variance](https://aman.ai/coursera-dl/improving-deep-neural-networks/#bias--variance) |
+| Resume/comm | archive (122) | recruiter "X-Y-Z formula" + Deepali Kothari 1-page tips screenshots |
+
+**Study-time budget:** Linux 3–4h · REST 2h · Docker 4–5h · K8s 3h theory · AWS 4h · SQL 5–6h · CI/CD 3h (copy `tamil-tokenizer` workflow) · Heap 90 min. Total ≈ 26h ≈ one focused week.
+
+**Job-tracker schema (stolen from `ramansrivastava/job-prep-dashboard`, adapted):** `Saved → Applied → OA → Interview → Offer / Rejected`. Columns: company, role, type (A/B/C/D), link, date, status, follow-up. No tracker = lying to yourself.
+
+**Comms (keep verbatim):** explain builds to non-techies without condescension · write messages needing zero follow-ups · flag blockers *before* deadlines, never after. Resume bullets in X-Y-Z (`Accomplished X by Y → Z%`), 1 page, metrics.
+
+> Key hygiene: both Meilisearch frontends currently ship the **master** key `barryallen@16` in public JS. Mint a search-only scoped key via `aman.ai-search/index_meilisearch.py` and rotate master when free.
 
 *This blueprint serves as the definitive, living reference document for all subsequent interview preparation, portfolio updates, and application targeting.*
