@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026-09-04 — Heap Day 1 (restart) — Grey Matter</title>
+<link rel="stylesheet" href="../static/css/tailwind.css">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/css/fonts.css">
+<style>
+</style>
+<!-- Favicon + website logo (no border) -->
+<link rel="icon" href="../favicon/favicon.ico" type="image/x-icon" />
+<link rel="icon" href="../favicon/favicon-32x32.png" sizes="32x32" type="image/png" />
+<link rel="icon" href="../favicon/favicon-16x16.png" sizes="16x16" type="image/png" />
+<link rel="apple-touch-icon" href="../favicon/apple-touch-icon.png" />
+<script src="../static/js/pixel-icons.js"></script>
+<style>
+  *{font-family:"Geist",system-ui,sans-serif}
+  .mono{font-family:"Geist Mono",monospace}
+  .pixel{font-family:"GeistPixel","Geist",sans-serif; letter-spacing:-0.02em}
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-thumb{background:#27272a;border-radius:8px}
+  .tick{width:20px;height:20px;min-width:20px; accent-color:#10b981; touch-action:manipulation}
+  .tick:checked+span{text-decoration:line-through;opacity:0.55}
+  .progress{transition:width .3s ease}
+  html{ -webkit-text-size-adjust: 100%; }
+  label{ touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  label:has(.tick){ padding: 6px 0; margin: -6px 0; }
+  @supports(padding: max(0px)){ header{ padding-top: max(0.5rem, env(safe-area-inset-top)); } }
+</style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 antialiased">
+<header class="sticky top-0 z-30 bg-zinc-950/90 backdrop-blur border-b border-zinc-800" style="padding-top: env(safe-area-inset-top);">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between gap-3 sm:gap-4">
+    <div class="min-w-0 flex-1">
+      <h1 class="text-base sm:text-lg font-bold truncate">2026-09-04 <span class="text-zinc-500 font-normal">· Heap Day 1 (restart)</span></h1>
+      <p class="text-[11px] sm:text-xs text-zinc-500 mono truncate">Sep 2–3 died · restart, don't repay · <span id="dateStr"></span></p>
+    </div>
+    <div class="text-right shrink-0">
+      <div class="text-sm font-semibold"><span id="doneCount">0</span>/<span id="totalCount">0</span></div>
+      <div class="w-24 sm:w-32 h-1.5 bg-zinc-800 rounded-full mt-1 overflow-hidden"><div id="progressBar" class="h-full bg-emerald-500 progress" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 pb-3 flex gap-2 overflow-x-auto scrollbar-none">
+    <button onclick="resetDay()" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px]">Reset</button>
+    <button onclick="exportMD()" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px]">Export .md</button>
+    <a href="./index.html" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px] flex items-center">All roadmaps</a>
+    <a href="../index.html" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-emerald-500 text-black font-semibold hover:bg-emerald-400 min-h-[40px] flex items-center">Docs</a>
+  </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-5">
+
+  <section class="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
+    <h2 class="font-bold text-emerald-400 text-sm flex items-center gap-2"><i data-lucide="rocket" class="w-4 h-4"></i> Today's Edge</h2>
+    <p class="text-sm mt-1">Sep 2–3 produced zero. You don't repay dead days — you restart. One thing today: <strong>Heap + 1 real commit</strong>. Kth Largest and Top K from scratch, then kaggle-automation Dockerfile that passes <code class="mono text-xs bg-zinc-800 px-1 rounded">docker build .</code> Everything else is bonus.</p>
+    <div class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+      <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2"><strong>Type A</strong><br><span class="text-zinc-500">LeetCode — protected tests</span></div>
+      <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2"><strong>Type B</strong><br><span class="text-zinc-500">AI code — spot subtle bugs</span></div>
+      <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2"><strong>Type C</strong><br><span class="text-zinc-500">Portfolio — why this stack?</span></div>
+      <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2"><strong>Type D</strong><br><span class="text-zinc-500">ML from scratch</span></div>
+    </div>
+    <p class="text-xs text-zinc-400 mt-3">Classify each JD (A/B/C/D) before applying, then copy-paste to recruiter:</p>
+    <div class="mt-2 bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs leading-relaxed">“I want to come as prepared as I possibly can. Since there are so many focus areas right now, I'd really appreciate any guidance on what to prioritize for this role — DSA, system design, or portfolio deep-dive?” <button onclick="navigator.clipboard.writeText(this.previousSibling.textContent)" class="ml-2 text-emerald-400 underline">Copy</button></div>
+  </section>
+
+  <section class="grid sm:grid-cols-2 gap-4">
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <h3 class="font-semibold text-sm">Be T-shaped</h3>
+      <ul class="text-xs text-zinc-400 mt-2 space-y-1 list-disc ml-4">
+        <li><strong class="text-zinc-200">Product thinking:</strong> write 1 user story for kaggle (“As a user I want to shard 10GB”)</li>
+        <li><strong class="text-zinc-200">Calm in chaos:</strong> 25-min struggle cap then read editorial, no spiral</li>
+        <li><strong class="text-zinc-200">Communication:</strong> flag blockers before deadlines — say the Type C answer aloud once</li>
+      </ul>
+    </div>
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <h3 class="font-semibold text-sm">Brutal truth for today</h3>
+      <p class="text-xs text-zinc-400 mt-2">Graduated 4 months ago, 2 LeetCode solves logged, Sep 2–3 went to zero. Collecting advice is not progress. Today: <strong class="text-zinc-200">2 heap problems + 1 commit + 3 tailored apps</strong> — nothing else counts.</p>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="space-y-3">
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-zinc-800 px-2 py-0.5 rounded">07:00</span> Wake — no phone <span class="ml-auto text-zinc-500">40m</span></div>
+      <label class="flex gap-3 mt-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="wake"><span class="text-sm">Water, 20m walk/run + shower. Phone stays outside bedroom.</span></label>
+    </div>
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-emerald-500 text-black px-2 py-0.5 rounded">08:10–09:40</span> DSA 1 — Heap restart <span class="ml-auto text-emerald-400">90m</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="heap_video"><span class="text-sm"><strong>Watch ONE (25m max):</strong> <a href="https://youtube.com/watch?v=E2v9hBgG6gE" target="_blank" class="text-emerald-400 underline">Greg Hogg — Heaps & Priority Queues</a> (from your yt-ssf) — then code <code class="mono text-xs bg-zinc-800 px-1 rounded">heapq.heappush / heappop</code> once from memory</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="heap_read"><span class="text-sm"><strong>Read (10m):</strong> <a href="https://aman.ai/code/heap/" target="_blank" class="text-emerald-400 underline">aman.ai — Heap</a> + <a href="https://www.techinterviewhandbook.org/algorithms/heap/" target="_blank" class="text-emerald-400 underline">Tech Interview Handbook — Heap</a> — heapify, push/pop O(log n)</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="heap_kth"><span class="text-sm"><strong>Solve:</strong> <a href="https://leetcode.com/problems/kth-largest-element-in-an-array/" target="_blank" class="text-emerald-400 underline">Kth Largest Element</a> — 25m cap → editorial → re-implement clean</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="heap_topk"><span class="text-sm"><strong>Solve:</strong> <a href="https://leetcode.com/problems/top-k-frequent-elements/" target="_blank" class="text-emerald-400 underline">Top K Frequent Elements</a> — write time O(n log k) space O(n) in comment</span></label>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-emerald-500 text-black px-2 py-0.5 rounded">09:55–11:25</span> DSA 2 — Blind redo <span class="ml-auto text-zinc-500">90m</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="redo"><span class="text-sm"><strong>Redo both heap problems from scratch</strong> — blank editor, no peeking. Speak logic aloud.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="edgecases"><span class="text-sm">Test: empty, single element, duplicates, large input. One <code class="mono text-xs bg-zinc-800 px-1 rounded">heapq</code> snippet from memory.</span></label>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-blue-500 text-white px-2 py-0.5 rounded">11:35–13:05</span> Project 1 — Dockerfile + CI <span class="ml-auto text-blue-300">90m</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="docker"><span class="text-sm"><strong>Dockerize kaggle-automation:</strong> <code class="mono text-xs bg-zinc-800 px-1 rounded">Dockerfile</code> + <code class="mono text-xs bg-zinc-800 px-1 rounded">docker-compose.yml</code> — must pass <code class="mono text-xs bg-zinc-800 px-1 rounded">docker build .</code> Stuck? <a href="https://aman.ai/infra/docker/#step-3-run-the-docker-container" target="_blank" class="text-emerald-400 underline">aman.ai Docker run</a></span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="ci"><span class="text-sm"><strong>CI:</strong> <code class="mono text-xs bg-zinc-800 px-1 rounded">.github/workflows/ci.yml</code> running <code class="mono text-xs bg-zinc-800 px-1 rounded">pytest</code> + lint on push. Copy from tokenizer repo.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="commit"><span class="text-sm"><strong>Commit & push:</strong> one atomic commit, real message. Today's proof.</span></label>
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-zinc-800 bg-zinc-900/30 p-3 text-xs text-zinc-500 mono text-center">13:05–14:00 Lunch — actually rest, no screen</div>
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-blue-500 text-white px-2 py-0.5 rounded">14:00–15:30</span> Project 2 — Postgres + Redis <span class="ml-auto text-blue-300">90m</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="postgres"><span class="text-sm"><strong>Postgres:</strong> swap SQLite → Postgres in compose. One index + <code class="mono text-xs bg-zinc-800 px-1 rounded">EXPLAIN ANALYZE SELECT</code>.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="redis"><span class="text-sm"><strong>Redis:</strong> <code class="mono text-xs bg-zinc-800 px-1 rounded">redis:alpine</code> + cache-aside (TTL 5m) + rate limit 10/min.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="proj_why"><span class="text-sm"><strong>Type C answer (3 lines):</strong> Why FastAPI not Flask? Say it aloud once.</span></label>
+      </div>
+      <p class="text-xs text-zinc-500 mt-2">Why? <a href="https://roadmap.sh/backend" target="_blank" class="text-emerald-400 underline">roadmap.sh/backend</a> expects DB depth + caching before queues/K8s.</p>
+    </div>
+
+    <div class="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-amber-500 text-black px-2 py-0.5 rounded">15:45–16:30</span> Applications — 3 good <span class="ml-auto text-amber-400">45m</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="apps_search"><span class="text-sm"><strong>Find 3 fresh JDs:</strong> <a href="https://www.google.com/search?q=site%3Alever.co+junior+python" target="_blank" class="text-emerald-400 underline">site:lever.co</a> / <a href="https://www.google.com/search?q=site%3Agreenhouse.io+junior+python" target="_blank" class="text-emerald-400 underline">site:greenhouse.io</a> + Naukri & Instahyre</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="apps_classify"><span class="text-sm"><strong>Classify each A/B/C/D</strong> and note it.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="apps_tracker"><span class="text-sm"><strong>Log tracker:</strong> company, role, type, link, date, status (<code class="mono text-xs bg-zinc-800 px-1 rounded">Saved→Applied→OA→Interview→Offer/Rejected</code>), follow-up.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="apps_msg"><span class="text-sm"><strong>Send 1 recruiter DM</strong> (copy above) + GitHub link asking feedback. Referral ≈ 40 cold applies.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="apps_tailor"><span class="text-sm"><strong>Tailor 1 resume:</strong> 1 page, X-Y-Z bullets (<code class="mono text-xs bg-zinc-800 px-1 rounded">Accomplished X by Y → Z%</code>).</span></label>
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-zinc-800 bg-zinc-900/30 p-3 text-xs text-zinc-500 mono text-center">16:30–17:45 Move — run/gym 60m. Not optional.</div>
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-violet-500 text-white px-2 py-0.5 rounded">18:15–19:30</span> Fundamentals — Friday OS + SQL <span class="ml-auto text-violet-300">75m</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="fund_os"><span class="text-sm"><strong>OS:</strong> threads vs processes + <code class="mono text-xs bg-zinc-800 px-1 rounded">ps/kill/pkill</code> for nohup jobs — explain aloud 10m.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="fund_sql"><span class="text-sm"><strong>SQL (20m):</strong> <code class="mono text-xs bg-zinc-800 px-1 rounded">HAVING</code> + subqueries — write 3 queries. Then <a href="https://mystery.knightlab.com/" target="_blank" class="text-emerald-400 underline">SQL Murder Mystery</a> 2 steps.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="fund_rag"><span class="text-sm"><strong>RAG:</strong> <a href="https://aman.ai/primers/ai/RAG/" target="_blank" class="text-emerald-400 underline">aman.ai — RAG</a> — why chunk + embed? Link to your 1.18M chunks.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="fund_star"><span class="text-sm"><strong>STAR story:</strong> one for kaggle-automation — saves rounds when tech wobbles.</span></label>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-zinc-700 text-white px-2 py-0.5 rounded">20:15–21:00</span> Review <span class="ml-auto text-zinc-400">45m</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="rev_log"><span class="text-sm"><strong>Log one line:</strong> date · problems done · solved-without-help? · commit? · apps sent — notebook, not notion.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="rev_flash"><span class="text-sm">5m flashcards: heap complexity, HAVING vs WHERE, OS paging.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="rev_next"><span class="text-sm"><strong>Write tomorrow's 3 tasks on paper</strong> — not in your head.</span></label>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-zinc-700 bg-zinc-800/30 p-4 text-center">
+      <p class="text-sm font-semibold">Minimum viable day</p>
+      <p class="text-xs text-zinc-400 mt-1">2 heap problems + 1 app + 30m docker — never zero. Streak > perfection.</p>
+      <label class="flex justify-center gap-2 mt-3 cursor-pointer"><input type="checkbox" class="tick" data-id="mvp"><span class="text-sm">MVP checked</span></label>
+    </div>
+
+  </section>
+
+  <section class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+    <h3 class="font-semibold text-sm">If you only do 3 things</h3>
+    <ol class="text-sm mt-2 space-y-1 list-decimal ml-5">
+      <li>Kth Largest + Top K Frequent without looking</li>
+      <li>Ship the Dockerfile — <code class="mono text-xs bg-zinc-800 px-1 rounded">docker build .</code> passes + push</li>
+      <li>Send 1 DM with the recruiter line + GitHub link</li>
+    </ol>
+    <p class="text-xs text-zinc-500 mt-3">Verified resources: <a href="https://barryallen16.github.io/yt-ssf/" target="_blank" class="text-emerald-400 underline">yt-ssf</a> · <a href="https://barryallen16.github.io/aman.ai-search/" target="_blank" class="text-emerald-400 underline">aman.ai-search</a> · archive Bandit/SQL/X-Y-Z notes. Sep 2 file stays as history — today is the restart.</p>
+  </section>
+
+  <div class="text-center text-xs text-zinc-600 mono py-4">
+    21:00 free — guilt free. 23:00 lights out. 8h sleep or heap is wasted.
+  </div>
+</main>
+
+<script>
+  const KEY='roadmap-2026-09-04';
+  const checks=document.querySelectorAll('.tick:not([disabled])');
+  document.getElementById('totalCount').textContent=checks.length;
+  document.getElementById('dateStr').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'});
+  function load(){
+    try{
+      const s=JSON.parse(localStorage.getItem(KEY)||'{}');
+      checks.forEach(c=>{ if(s[c.dataset.id]) c.checked=true; });
+    }catch{}
+    update();
+  }
+  function save(){
+    const s={};
+    checks.forEach(c=>{ s[c.dataset.id]=c.checked; });
+    localStorage.setItem(KEY, JSON.stringify(s));
+  }
+  function update(){
+    const done=[...checks].filter(c=>c.checked).length;
+    document.getElementById('doneCount').textContent=done;
+    document.getElementById('progressBar').style.width=(done/checks.length*100)+'%';
+  }
+  checks.forEach(c=>c.addEventListener('change',()=>{save();update();}));
+  function resetDay(){ if(confirm('Reset today?')){localStorage.removeItem(KEY); checks.forEach(c=>c.checked=false); update();}}
+  function exportMD(){
+    let md='# 2026-09-04 Roadmap\n\nProgress '+document.getElementById('doneCount').textContent+'/'+document.getElementById('totalCount').textContent+'\n\n';
+    checks.forEach(c=>{
+      const label=c.parentElement.innerText.trim().replace(/\s+/g,' ');
+      md+='- ['+(c.checked?'x':' ')+'] '+label+'\n';
+    });
+    const blob=new Blob([md],{type:'text/markdown'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='2026-09-04.md'; a.click();
+  }
+  load();
+  if(window.refreshIcons) refreshIcons(document.body);
+</script>
+</body>
+</html>
