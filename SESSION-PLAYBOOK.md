@@ -20,20 +20,26 @@ Read this first in any new session. It encodes every hard-won lesson from prior 
 7. **No secrets in git.** Telegram token leak (`results.jsonl#L1516`) once triggered GitHub secret alert + full `filter-branch` purge. Redact as `REDACTED_*`, rotate via BotFather, never commit `.env`/keys.
 8. **Keep dir lean (~22M).** Delete after use: `node_modules/`, `package-lock.json`, `*.zip`, `*.mhtml`, `scripts/.enrich_cache.json`, `*.log`, `.venv/`, nested `.git/`. `results*.jsonl` (4.8M each) ARE tracked (Pages needs them, token redacted). `youtube_urls.*`, `ats-resume-creation-skill/` stay ignored/deleted.
 
-## 2. Cloning other repos (slow network — clones time out)
+## 2. Other repos — DO NOT CLONE (policy)
 
-- Clone to `/tmp/clones/<name>`, **one repo per command**, generous timeout. `aman.ai-search` has a 95MB `aman-ai-sections.jsonl` — full clone stalls; use GitHub API + raw instead:
-  - `https://api.github.com/repos/barryallen16/aman.ai-search/contents/`
-  - `https://raw.githubusercontent.com/barryallen16/aman.ai-search/main/<file>`
-- Known repos: `barryallen16/yt-ssf` (33M, subscription-feed search), `barryallen16/aman.ai-search` (scrape+index, demo `https://barryallen16.github.io/aman.ai-search/`), `ramansrivastava/job-prep-dashboard` (single-file dashboard).
+Cloning was a one-time need to learn response shapes + endpoints. That knowledge is captured below — **never clone again**. If you must read a file, use GitHub API + raw (no clone):
+- `https://api.github.com/repos/barryallen16/aman.ai-search/contents/`
+- `https://raw.githubusercontent.com/barryallen16/aman.ai-search/main/<file>`
 
-## 3. Meilisearch (same box for both indexes)
+## 3. Meilisearch (same box, both indexes — everything a session needs)
 
 - Host `https://adhi.isroot.in`, key `barryallen@16` (public master key — usable for reads; recommend minting search-only keys via `aman.ai-search/index_meilisearch.py` and rotating master).
 - Health: `curl https://adhi.isroot.in/health` → `{"status":"available"}`
-- Query pattern: `curl -s -H "Authorization: Bearer barryallen@16" -H "Content-Type: application/json" --data-binary '{"q":"<query>","limit":3}' "https://adhi.isroot.in/indexes/<yt-ssf|aman-ai>/search"`
 - Demos: `https://barryallen16.github.io/yt-ssf/`, `https://barryallen16.github.io/aman.ai-search/`
-- yt-ssf hit → `https://youtube.com/watch?v=<id>`; aman-ai hit `url` field is already a deep anchor link.
+- Query (both indexes, same shape):
+```bash
+curl -s -H "Authorization: Bearer barryallen@16" -H "Content-Type: application/json" \
+  --data-binary '{"q":"<query>","limit":3}' \
+  "https://adhi.isroot.in/indexes/<yt-ssf|aman-ai>/search"
+```
+- **yt-ssf hit shape** (`index yt-ssf`, subscription-feed videos): `{id, title, description, thumbnail_url, channel_name}` → watch link = `https://youtube.com/watch?v=<id>`. Known counts: `heap` 28 · `docker` 200 · `rest api` 112 · `sql join group by` 226 (weak top-3, wrappers only).
+- **aman-ai hit shape** (`index aman-ai`, 20,595 sections / 485 pages): `{url (deep anchor link — use directly), page_url, title, section_title, level, section_path[], content}`. Known: strong on `docker` ([Step 3: Run the Container](https://aman.ai/infra/docker/#step-3-run-the-docker-container)) and `bias variance`; **no dedicated heap page**.
+- Frontend pattern both use: `POST /indexes/<name>/search` with `Bearer`, `Ctrl+K` focuses search, render `title/url/snippet`.
 
 ## 4. Archive sweep (5340 docs, local)
 
