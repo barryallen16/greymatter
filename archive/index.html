@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Archive — 5340 Screenshots · barryallen16</title>
 <meta name="description" content="Searchable archive of 5340 screenshots: career advice, YouTube, websites, visual-text notes, GitHub repos. Built for phone + laptop.">
-<meta name="theme-color" content="#0a0a0a">
+<meta name="theme-color" content="#09090b">
 <!-- Favicon + website logo (no border) -->
 <link rel="icon" href="../favicon/favicon.ico" type="image/x-icon" />
 <link rel="icon" href="../favicon/favicon-32x32.png" sizes="32x32" type="image/png" />
@@ -29,15 +29,16 @@
   body{overscroll-behavior-y:contain}
   input[type=search]::-webkit-search-cancel-button{display:none}
   mark{background:rgba(167,139,250,.35); color:inherit; border-radius:2px; padding:0 1px}
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
   @supports(padding:max(0px)){header{padding-top:env(safe-area-inset-top)}}
   /* Pixel headline glow like vercel */
   .pixel-glow{ text-shadow: 0 0 20px rgba(255,255,255,0.15); }
 </style>
 </head>
-<body class="bg-[#0a0a0a] text-zinc-100 antialiased min-h-screen flex flex-col">
+<body class="bg-zinc-950 text-zinc-100 antialiased min-h-screen flex flex-col">
 
 <!-- Header -->
-<header class="sticky top-0 z-30 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-zinc-800">
+<header class="sticky top-0 z-30 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800">
   <div class="max-w-[1280px] mx-auto px-4 sm:px-6">
     <div class="flex items-center gap-3 py-3 sm:py-4">
       <a href="../" class="shrink-0 w-9 h-9 rounded-xl bg-white text-black flex items-center justify-center font-bold text-sm pixel">A</a>
@@ -45,7 +46,7 @@
         <h1 class="pixel text-[18px] sm:text-[22px] font-bold leading-none pixel-glow">archive<span class="text-zinc-500">.isroot.in</span></h1>
         <p class="mono text-[11px] text-zinc-500 truncate">5340 screenshots · searchable · phone-first · Geist Pixel headlines</p>
       </div>
-      <a href="../" class="flex text-xs px-3 sm:px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800">Docs →</a>
+      <a href="../docs/" class="flex text-xs px-3 sm:px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800">Docs →</a>
       <a href="../roadmaps/" class="flex text-xs px-3 sm:px-4 py-2.5 rounded-full bg-white text-black font-semibold hover:bg-zinc-200">Roadmaps →</a>
     </div>
 
@@ -70,7 +71,6 @@
         <div id="activeChips" class="flex gap-2 flex-wrap flex-1"></div>
         <select id="sortSel" aria-label="Sort results" class="bg-zinc-900 border border-zinc-800 rounded-full px-3 py-2.5 mono text-xs min-h-[44px]">
           <option value="recent">Recent first</option>
-          <option value="oldest">Oldest first</option>
           <option value="relevance">Relevance</option>
         </select>
       </div>
@@ -88,7 +88,11 @@
 <!-- Main -->
 <main class="flex-1 max-w-[1280px] mx-auto w-full px-4 sm:px-6 pb-10">
   <div id="status" class="mono text-xs text-zinc-500 py-4">Loading 5340 items…</div>
-  <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"></div>
+  <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" aria-hidden="true">
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden"><div class="aspect-video bg-zinc-800 animate-pulse"></div><div class="p-4 space-y-2"><div class="h-4 bg-zinc-800 rounded animate-pulse w-1/3"></div><div class="h-4 bg-zinc-800 rounded animate-pulse"></div><div class="h-3 bg-zinc-800 rounded animate-pulse w-2/3"></div></div></div>
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden hidden sm:block"><div class="aspect-video bg-zinc-800 animate-pulse"></div><div class="p-4 space-y-2"><div class="h-4 bg-zinc-800 rounded animate-pulse w-1/3"></div><div class="h-4 bg-zinc-800 rounded animate-pulse"></div><div class="h-3 bg-zinc-800 rounded animate-pulse w-2/3"></div></div></div>
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden hidden lg:block"><div class="aspect-video bg-zinc-800 animate-pulse"></div><div class="p-4 space-y-2"><div class="h-4 bg-zinc-800 rounded animate-pulse w-1/3"></div><div class="h-4 bg-zinc-800 rounded animate-pulse"></div><div class="h-3 bg-zinc-800 rounded animate-pulse w-2/3"></div></div></div>
+  </div>
 
   <!-- pagination -->
   <div id="pager" class="flex items-center justify-between mt-6 gap-3 hidden">
@@ -132,7 +136,7 @@
       <br>Source: <code class="bg-zinc-900 px-1 rounded">results.enriched.jsonl</code> · thumbs are compressed webp (see scripts/build_thumbs.sh)
     </div>
     <div class="flex gap-2">
-      <a href="../index.html" class="px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800">Docs</a>
+      <a href="../docs/" class="px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800">Docs</a>
       <a href="../roadmaps/" class="px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800">Roadmaps</a>
     </div>
   </div>
@@ -300,7 +304,6 @@ function applyFilters(scroll=false){
   // sort (a query implies relevance unless user picked otherwise)
   const eff = (term && sort==='recent') ? 'relevance' : sort;
   if(eff==='recent') VIEW.sort((a,b)=> b.timestamp - a.timestamp);
-  else if(eff==='oldest') VIEW.sort((a,b)=> a.timestamp - b.timestamp);
   else if(eff==='relevance' && term){
     // _s already computed in filter above
     VIEW.sort((a,b)=> (b._s||0)-(a._s||0) + ((b.title.toLowerCase().includes(term)?1:0)-(a.title.toLowerCase().includes(term)?1:0)));
@@ -326,7 +329,7 @@ function initFromUrl(){
   const c = p.get('cat');
   if(c && CATS.some(x=>x.id===c)) cat = c;
   const s = p.get('sort');
-  if(s && ['recent','oldest','relevance'].includes(s)) sort = s;
+  if(s && ['recent','relevance'].includes(s)) sort = s;
   page = Math.max(0, parseInt(p.get('page')||'0', 10) || 0);
   qs('#q').value = q;
   qs('#sortSel').value = sort;
@@ -340,10 +343,12 @@ function renderActiveChips(){
   const chips = [];
   if(q) chips.push(`<span class="mono text-xs bg-zinc-800 border border-zinc-700 px-2.5 py-1 rounded-full flex items-center gap-1">“${escapeHtml(q)}” <button onclick="clearQ()" aria-label="Clear search" class="hover:text-white flex items-center"><i data-lucide="x" class="w-3 h-3"></i></button></span>`);
   if(cat!=='all') chips.push(`<button onclick="window.setCat('all')" class="mono text-xs bg-white text-black px-2.5 py-1 rounded-full">${catLabel(cat)} ✕</button>`);
+  if(!chips.length && !q && cat==='all') chips.push(`<span class="mono text-xs text-zinc-600 py-1">Try:</span>` + ['python','k8s','sql having'].map(t=>`<button onclick="window.trySuggest('${t}')" class="mono text-xs bg-zinc-900 border border-zinc-700 px-2.5 py-1 rounded-full hover:bg-zinc-800">${t}</button>`).join(''));
   el.innerHTML = chips.join('') || `<span class="mono text-xs text-zinc-600">${VIEW.length} results</span>`;
   if(window.refreshIcons) refreshIcons(el);
   qs('#countLabel').textContent = VIEW.length;
 }
+window.trySuggest = t => { qs('#q').value=t; q=t; qs('#clearBtn').classList.remove('hidden'); page=0; applyFilters(); syncUrl(); qs('#q').focus(); };
 
 function highlight(text, toks){
   let out = escapeHtml(text);
@@ -379,7 +384,6 @@ function renderGrid(scroll=false){
       <div class="p-4 flex flex-col gap-2 flex-1">
       <div class="flex items-center gap-2">
         <span class="mono text-[11px] px-2 py-0.5 rounded-full border ${catColor(r.category)}">${catLabel(r.category)}</span>
-        ${r.confidence ? `<span class="mono text-[10px] text-zinc-500 ml-auto">${(r.confidence*100).toFixed(0)}%</span>` : ''}
       </div>
       <h3 class="font-semibold text-[14px] leading-tight line-clamp-2 group-hover:text-white">${title || '<span class="text-zinc-500">Untitled</span>'}</h3>
       ${sum ? `<p class="mono text-xs text-zinc-400 line-clamp-3 leading-relaxed">${sum}</p>` : ''}
@@ -438,7 +442,10 @@ qs('#closeDrawer').onclick = closeDrawer;
 qs('#drawerBg').onclick = closeDrawer;
 window.openDetail = openDetail;
 window.closeDrawer = closeDrawer;
-document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !qs('#drawer').classList.contains('hidden')) closeDrawer(); });
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape' && !qs('#drawer').classList.contains('hidden')) closeDrawer();
+  if(e.key==='/' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName||'')){ e.preventDefault(); qs('#q').focus(); }
+});
 
 // Events (input debounced 150ms — 5k-item fuzzy scan per keystroke)
 let deb = null;

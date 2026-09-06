@@ -27,6 +27,7 @@
   html{ -webkit-text-size-adjust: 100%; }
   label{ touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
   label:has(.tick){ padding: 6px 0; margin: -6px 0; }
+  @media (prefers-reduced-motion: reduce){.progress{transition:none}}
   @supports(padding: max(0px)){ header{ padding-top: max(0.5rem, env(safe-area-inset-top)); } }
 </style>
 </head>
@@ -46,11 +47,13 @@
     <button onclick="resetDay()" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px]">Reset</button>
     <button onclick="exportMD()" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px]">Export .md</button>
     <a href="./index.html" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px] flex items-center">All roadmaps</a>
-    <a href="../index.html" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-emerald-500 text-black font-semibold hover:bg-emerald-400 min-h-[40px] flex items-center">Docs</a>
+    <a href="./2026-09-02.html" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px] flex items-center">← Sep 02</a>
+    <a href="../docs/" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-emerald-500 text-black font-semibold hover:bg-emerald-400 min-h-[40px] flex items-center">Docs</a>
   </div>
 </header>
 
 <main class="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-5">
+  <div id="doneBanner" class="hidden rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-4 text-center text-sm"><span class="font-bold text-emerald-300">Day complete.</span> <span class="text-zinc-300">Export .md as backup — streak &gt; perfection.</span></div>
 
   <section class="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
     <h2 class="font-bold text-emerald-400 text-sm flex items-center gap-2"><i data-lucide="rocket" class="w-4 h-4"></i> Today's Edge</h2>
@@ -203,6 +206,7 @@
     const done=[...checks].filter(c=>c.checked).length;
     document.getElementById('doneCount').textContent=done;
     document.getElementById('progressBar').style.width=(done/checks.length*100)+'%';
+    document.getElementById('doneBanner').classList.toggle('hidden', !(checks.length && done===checks.length));
   }
   checks.forEach(c=>c.addEventListener('change',()=>{save();update();}));
   function resetDay(){ if(confirm('Reset today?')){localStorage.removeItem(KEY); checks.forEach(c=>c.checked=false); update();}}

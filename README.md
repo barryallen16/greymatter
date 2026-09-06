@@ -12,7 +12,7 @@ python -m http.server 8000
 # open http://localhost:8000   (or http://<your-laptop-ip>:8000 on phone same WiFi)
 ```
 
-`index.html` fetches `*.md` via `fetch()` — it **must** be served over HTTP (fails on `file://`). The error card explains this.
+`docs/index.html` fetches `../*.md` via `fetch()` — it **must** be served over HTTP (fails on `file://`). The error card explains this.
 
 ## VPS deploy (1 command)
 
@@ -62,7 +62,8 @@ curl -H "Host: archive.isroot.in" http://YOUR_VPS_IP/health
 
 ```
 job-search/  (now Grey Matter, was job-search)
-  index.html              → Docs viewer (Daily Plan, Ideas, Ranking, Repo Analysis...) — Geist Pixel headlines
+  index.html              → Redirect to roadmaps/ (roadmap is the landing page)
+  docs/index.html         → Docs viewer (Daily Plan, Ideas, Ranking, Repo Analysis...) — Geist Pixel headlines
   daily-plan.md, ideas.md, ideas_ranking.md, repo-analysis.md, roles-*.md, career_advice_insights.md, fresher-*.md
   roadmaps/
     index.html            → list of daily roadmaps
