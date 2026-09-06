@@ -45,8 +45,11 @@
   <div class="max-w-4xl mx-auto px-4 sm:px-6 pb-3 flex gap-2 overflow-x-auto scrollbar-none">
     <button onclick="resetDay()" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px]">Reset</button>
     <button onclick="exportMD()" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px]">Export .md</button>
+    <button onclick="document.getElementById('importFile').click()" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px]">Import .md</button>
+    <input type="file" id="importFile" accept=".md,text/markdown" class="hidden">
     <a href="./index.html" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px] flex items-center">All roadmaps</a>
     <a href="../docs/" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-emerald-500 text-black font-semibold hover:bg-emerald-400 min-h-[40px] flex items-center">Docs</a>
+    <a href="../tracker/" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px] flex items-center">Tracker</a>
   </div>
 </header>
 
@@ -187,7 +190,17 @@
   function save(){
     const s={};
     checks.forEach(c=>{ s[c.dataset.id]=c.checked; });
-    localStorage.setItem(KEY, JSON.stringify(s));
+    try{ localStorage.setItem(KEY, JSON.stringify(s)); }
+    catch{ warnStore(); }
+  }
+  function warnStore(){
+    let d=document.getElementById('storeWarn');
+    if(d){ d.classList.remove('hidden'); return; }
+    d=document.createElement('div');
+    d.id='storeWarn';
+    d.className='rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-xs text-red-300';
+    d.textContent='Browser storage is blocked — ticks will NOT survive a reload. Allow site data for this site, or use Export .md as backup.';
+    document.querySelector('main').prepend(d);
   }
   function update(){
     const done=[...checks].filter(c=>c.checked).length;
@@ -203,8 +216,31 @@
       md+='- ['+(c.checked?'x':' ')+'] '+label+'\n';
     });
     const blob=new Blob([md],{type:'text/markdown'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='2026-09-02.md'; a.click();
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);     a.download='2026-09-02.md'; a.click();
   }
+  // Import .md (exported from another device) — matches task labels, applies ticks
+  document.getElementById('importFile').addEventListener('change', e=>{
+    const f = e.target.files[0];
+    if(f) importMD(f);
+    e.target.value = '';
+  });
+  function importMD(file){
+    const r = new FileReader();
+    r.onload = ()=>{
+      const map = {};
+      String(r.result||'').split('\n').forEach(line=>{
+        const m = line.match(/^-\s*\[(x| )\]\s*(.+)$/i);
+        if(m) map[m[2].trim().replace(/\s+/g,' ').toLowerCase()] = m[1].toLowerCase()==='x';
+      });
+      checks.forEach(c=>{
+        const label = c.parentElement.innerText.trim().replace(/\s+/g,' ').toLowerCase();
+        if(label in map) c.checked = map[label];
+      });
+      save(); update();
+    };
+    r.readAsText(file);
+  }
+  try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); }catch{ warnStore(); }
   load();
   if(window.refreshIcons) refreshIcons(document.body);
 </script>

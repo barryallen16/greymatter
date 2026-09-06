@@ -66,8 +66,10 @@ job-search/  (now Grey Matter, was job-search)
   docs/index.html         → Docs viewer (Daily Plan, Ideas, Ranking, Repo Analysis...) — Geist Pixel headlines
   daily-plan.md, ideas.md, ideas_ranking.md, repo-analysis.md, roles-*.md, career_advice_insights.md, fresher-*.md
   roadmaps/
-    index.html            → list of daily roadmaps
+    index.html            → list of daily roadmaps (+ Tracker link)
     2026-09-02.html       → Heap Day 1 (27 ticks, localStorage, Export .md)
+  tracker/
+    index.html            → Job application tracker (Saved→Applied→OA→Interview→Offer→Rejected, localStorage, Export .md)
   archive/
     index.html            → Searchable archive of 5340 screenshots — filter by category, search, drawer detail (Geist Pixel), buttons vimium-hintable, yt_dlp_url fallback
     thumbs/               → derived webp thumbs (640px, q70, gitignored — rebuild via ./scripts/build_thumbs.sh, needs caesiumclt)

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tracker — Grey Matter</title>
+<meta name="description" content="Job application tracker: Saved → Applied → OA → Interview → Offer → Rejected. Saved in your browser.">
+<link rel="stylesheet" href="../static/css/tailwind.css">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/css/fonts.css">
+<link rel="icon" href="../favicon/favicon.ico" type="image/x-icon" />
+<link rel="icon" href="../favicon/favicon-32x32.png" sizes="32x32" type="image/png" />
+<link rel="icon" href="../favicon/favicon-16x16.png" sizes="16x16" type="image/png" />
+<link rel="apple-touch-icon" href="../favicon/apple-touch-icon.png" />
+<script src="../static/js/pixel-icons.js"></script>
+<style>
+  *{font-family:"Geist",system-ui,sans-serif}
+  .mono{font-family:"Geist Mono",monospace}
+  .pixel{font-family:"GeistPixel","Geist",sans-serif;letter-spacing:-0.02em}
+  html{-webkit-text-size-adjust:100%}
+  input,select,textarea{font-size:16px}
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+  @supports(padding:max(0px)){body{padding-top:env(safe-area-inset-top)}}
+</style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen antialiased">
+<div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+
+  <div class="flex gap-2 mb-6 overflow-x-auto">
+    <a href="../roadmaps/" class="text-xs px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 flex items-center gap-2 shrink-0"><i data-lucide="clock" class="w-4 h-4"></i> Roadmaps</a>
+    <a href="../docs/" class="text-xs px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 flex items-center gap-2 shrink-0"><i data-lucide="file" class="w-4 h-4"></i> Docs</a>
+    <a href="../archive/" class="text-xs px-4 py-3 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-300 hover:bg-violet-500/20 flex items-center gap-2 shrink-0"><i data-lucide="archive" class="w-4 h-4"></i> Archive</a>
+  </div>
+
+  <div class="flex items-end gap-3">
+    <div class="flex-1 min-w-0">
+      <h1 class="pixel text-2xl font-bold">Tracker</h1>
+      <p class="text-sm text-zinc-500 mono mt-1"><span id="countLabel">0</span> applications · saved in this browser · export .md as backup</p>
+    </div>
+    <button onclick="exportMD()" class="shrink-0 text-xs px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[44px]">Export .md</button>
+  </div>
+
+  <div class="flex gap-2 mt-4 overflow-x-auto pb-1" id="stageBar" style="scrollbar-width:none"></div>
+
+  <form id="addForm" class="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4 space-y-3">
+    <div class="grid sm:grid-cols-2 gap-3">
+      <input id="fCompany" required maxlength="80" placeholder="Company *" autocomplete="off" class="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 placeholder-zinc-500 text-sm focus:outline-none focus:border-emerald-500/60 min-h-[44px]">
+      <input id="fRole" required maxlength="80" placeholder="Role *" autocomplete="off" class="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 placeholder-zinc-500 text-sm focus:outline-none focus:border-emerald-500/60 min-h-[44px]">
+    </div>
+    <input id="fLink" type="url" maxlength="500" placeholder="Job link https://…" autocomplete="off" class="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 placeholder-zinc-500 text-sm focus:outline-none focus:border-emerald-500/60 min-h-[44px]">
+    <select id="fStatus" aria-label="Status" class="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-sm mono min-h-[44px]">
+      <option value="saved">Saved</option><option value="applied">Applied</option><option value="oa">OA</option><option value="interview">Interview</option><option value="offer">Offer</option><option value="rejected">Rejected</option>
+    </select>
+    <details class="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3">
+      <summary class="cursor-pointer text-xs mono text-zinc-400">More — type, follow-up, note (all optional)</summary>
+      <div class="grid grid-cols-2 gap-3 mt-3">
+        <select id="fType" aria-label="Job type — classify after reading the JD" class="px-3 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-sm mono min-h-[44px] text-zinc-400">
+          <option value="">Type — later</option><option value="A">A · DSA-heavy</option><option value="B">B · AI-code review</option><option value="C">C · portfolio grill</option><option value="D">D · ML from scratch</option>
+        </select>
+        <input id="fFollowup" type="date" aria-label="Follow up date (auto +7 days)" class="px-3 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-sm mono min-h-[44px] text-zinc-400">
+      </div>
+      <p class="mono text-[11px] text-zinc-600 mt-2">Don't know the type yet? Leave it — classify after reading the JD.</p>
+      <input id="fNotes" maxlength="200" placeholder="Note — e.g. referral, recruiter name…" autocomplete="off" class="mt-3 w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 placeholder-zinc-500 text-sm focus:outline-none focus:border-emerald-500/60 min-h-[44px]">
+    </details>
+    <button type="submit" class="w-full py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-zinc-200 min-h-[44px]">Add application</button>
+  </form>
+
+  <div id="list" class="mt-4 space-y-3"></div>
+
+  <div id="empty" class="text-center py-14 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/30">
+    <div class="pixel text-2xl">no applications yet</div>
+    <p class="mono text-xs text-zinc-500 mt-1">Log today's 3 fresh JDs above — company + role is enough</p>
+  </div>
+
+  <div class="mt-8 text-xs text-zinc-600 mono flex gap-2">
+    <a href="../roadmaps/" class="px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 flex-1 text-center">Roadmaps</a>
+    <a href="../docs/" class="px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 flex-1 text-center">Docs</a>
+    <a href="../archive/" class="px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 flex-1 text-center">Archive</a>
+  </div>
+</div>
+
+<script>
+const KEY = 'tracker-apps-v1';
+const STAGES = [
+  {id:'all', label:'All'},
+  {id:'saved', label:'Saved', cls:'bg-zinc-800 text-zinc-300 border-zinc-700'},
+  {id:'applied', label:'Applied', cls:'bg-blue-500/15 text-blue-300 border-blue-500/20'},
+  {id:'oa', label:'OA', cls:'bg-violet-500/15 text-violet-300 border-violet-500/20'},
+  {id:'interview', label:'Interview', cls:'bg-amber-500/15 text-amber-300 border-amber-500/20'},
+  {id:'offer', label:'Offer', cls:'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'},
+  {id:'rejected', label:'Rejected', cls:'bg-red-500/10 text-red-400/80 border-red-500/20'},
+];
+let apps = [];
+let filter = 'all';
+const qs = s => document.querySelector(s);
+
+function load(){ try{ apps = JSON.parse(localStorage.getItem(KEY) || '[]'); }catch{ apps = []; } }
+function save(){ localStorage.setItem(KEY, JSON.stringify(apps)); }
+function esc(s){ return (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function stageLabel(id){ const f = STAGES.find(x=>x.id===id); return f ? f.label : id; }
+function stageCls(id){ const f = STAGES.find(x=>x.id===id); return (f && f.cls) || STAGES[1].cls; }
+function fmtDate(ts){ try{ return new Date(ts).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}); }catch{ return ''; } }
+
+function counts(){ const c = {all: apps.length}; STAGES.slice(1).forEach(s=> c[s.id] = apps.filter(a=>a.status===s.id).length); return c; }
+
+function renderStages(){
+  const c = counts();
+  qs('#stageBar').innerHTML = STAGES.map(s=>`<button type="button" onclick="setFilter('${s.id}')" aria-pressed="${filter===s.id}" class="shrink-0 px-3.5 py-2.5 rounded-full border text-xs font-medium mono flex items-center gap-1.5 min-h-[44px] ${filter===s.id ? 'bg-white text-black border-white' : 'bg-zinc-900 text-zinc-300 border-zinc-800'}">${s.label} <span class="${filter===s.id ? 'text-zinc-600' : 'text-zinc-500'}">${c[s.id]||0}</span></button>`).join('');
+}
+window.setFilter = id => { filter = id; renderStages(); renderList(); };
+
+function renderList(){
+  const rows = apps.filter(a=> filter==='all' || a.status===filter).sort((a,b)=> b.created - a.created);
+  qs('#countLabel').textContent = apps.length;
+  qs('#empty').style.display = apps.length ? 'none' : '';
+  qs('#list').innerHTML = rows.map(a=>`
+    <div class="rounded-2xl border ${a.status==='rejected' ? 'border-zinc-800/60 bg-zinc-900/40 opacity-70' : 'border-zinc-800 bg-zinc-900'} p-4">
+      <div class="flex items-start gap-2">
+        <div class="min-w-0 flex-1">
+          <div class="font-semibold text-sm leading-tight">${esc(a.company)} <span class="text-zinc-500 font-normal">· ${esc(a.role)}</span></div>
+          <div class="mono text-[11px] text-zinc-500 mt-1 flex flex-wrap gap-x-2 gap-y-0.5">
+            <span>${fmtDate(a.created)}</span>
+            ${a.type ? `<span>Type ${esc(a.type)}</span>` : ''}
+            ${a.followup ? `<span class="text-amber-400/90">follow up ${esc(a.followup)}</span>` : ''}
+            ${a.notes ? `<span class="w-full text-zinc-400">${esc(a.notes)}</span>` : ''}
+          </div>
+        </div>
+        <span class="mono text-[11px] px-2 py-0.5 rounded-full border shrink-0 ${stageCls(a.status)}">${stageLabel(a.status)}</span>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <select onchange="setStatus('${a.id}', this.value)" aria-label="Change status" class="flex-1 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-xs mono min-h-[44px]">
+          ${STAGES.slice(1).map(s=>`<option value="${s.id}"${a.status===s.id ? ' selected' : ''}>${s.label}</option>`).join('')}
+        </select>
+        ${a.link ? `<a href="${esc(a.link)}" target="_blank" rel="noopener noreferrer" class="shrink-0 px-4 py-2 rounded-xl bg-white text-black text-xs font-semibold hover:bg-zinc-200 flex items-center min-h-[44px]">Open</a>` : ''}
+        <button onclick="delApp('${a.id}')" aria-label="Delete" class="shrink-0 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-500 hover:text-red-400 hover:border-red-500/40 min-h-[44px]"><i data-lucide="trash" class="w-4 h-4 pointer-events-none"></i></button>
+      </div>
+    </div>`).join('');
+  if(window.refreshIcons) refreshIcons(qs('#list'));
+}
+window.setStatus = (id, st) => { const a = apps.find(x=>x.id===id); if(a){ a.status = st; save(); renderStages(); renderList(); } };
+window.delApp = id => { const a = apps.find(x=>x.id===id); if(a && confirm(`Delete ${a.company} — ${a.role}?`)){ apps = apps.filter(x=>x.id!==id); save(); renderStages(); renderList(); } };
+
+qs('#addForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const company = qs('#fCompany').value.trim(), role = qs('#fRole').value.trim();
+  if(!company || !role) return;
+  apps.push({ id: 'a' + Date.now().toString(36) + Math.floor(Math.random()*1e4).toString(36),
+    company, role, link: qs('#fLink').value.trim(), type: qs('#fType').value,
+    status: qs('#fStatus').value, followup: qs('#fFollowup').value, notes: qs('#fNotes').value.trim(), created: Date.now() });
+  save(); e.target.reset(); renderStages(); renderList();
+});
+
+window.exportMD = () => {
+  let md = '# Job applications\n\n';
+  STAGES.slice(1).forEach(s=>{
+    const rows = apps.filter(a=>a.status===s.id).sort((a,b)=> b.created - a.created);
+    md += `## ${s.label} (${rows.length})\n` + (rows.map(a=>`- ${a.company} — ${a.role}${a.type ? ` [Type ${a.type}]` : ''}${a.link ? ` (${a.link})` : ''}${a.followup ? ` · follow up ${a.followup}` : ''}${a.notes ? ` · ${a.notes}` : ''}`).join('\n') || '_none_') + '\n\n';
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([md], {type:'text/markdown'}));
+  a.download = 'job-tracker.md'; a.click();
+};
+
+{ const d = new Date(Date.now() + 7*864e5), p = n => String(n).padStart(2,'0');
+  qs('#fFollowup').value = `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; }
+load(); renderStages(); renderList();
+if(window.refreshIcons) refreshIcons(document.body);
+</script>
+</body>
+</html>
