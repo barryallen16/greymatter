@@ -234,6 +234,7 @@ async function load(){
         title: ed.title || '',
         channel: ed.channel_or_author || '',
         url: primaryUrl || '',
+        link: linkFor(primaryUrl),
         repo: ed.repo_name || '',
         thumb: ed.thumbnail_text || '',
         core: (ed.core_content || '').slice(0, 800),
@@ -378,7 +379,7 @@ function renderGrid(scroll=false){
     const rawTitle = r.title || r.summary?.slice(0,80) || r.file_name;
     const title = highlight(rawTitle, CUR_TOKS);
     const sum = highlight((r.summary || r.core || '').slice(0, 140), CUR_TOKS);
-    const urlHost = r.url ? (()=>{ try{return new URL(r.url).hostname.replace('www.','')}catch{return r.url.slice(0,30)}})() : '';
+    const urlHost = r.link ? (()=>{ try{return new URL(r.link).hostname.replace('www.','')}catch{return ''}})() : '';
     return `<article tabindex="0" role="button" aria-label="${escapeHtml(rawTitle).slice(0,100)}" onclick="openDetail(${idx})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetail(${idx})}" class="group text-left w-full cursor-pointer rounded-2xl border border-zinc-800 bg-zinc-900 hover:bg-zinc-800/80 hover:border-zinc-700 overflow-hidden flex flex-col gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/50">
       <div class="p-4 flex flex-col gap-2 flex-1">
       <div class="flex gap-3">
@@ -390,10 +391,11 @@ function renderGrid(scroll=false){
       </div>
       ${sum ? `<p class="mono text-xs text-zinc-400 line-clamp-2 leading-relaxed">${sum}</p>` : ''}
       ${r.channel ? `<p class="mono text-xs text-zinc-500 truncate">${escapeHtml(r.channel)}</p>` : ''}
-      ${r.url ? `<a href="${r.url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="mono text-xs text-emerald-400 truncate flex items-center gap-1 hover:underline"><i data-lucide="external-link" class="w-3 h-3 shrink-0"></i>${escapeHtml(urlHost)}</a>` : ''}
+      ${urlHost ? `<p class="mono text-xs text-zinc-500 truncate">${escapeHtml(urlHost)}</p>` : ''}
       <div class="flex items-center gap-2 mt-auto pt-2 border-t border-zinc-800">
         <span class="mono text-[11px] text-zinc-600 truncate flex-1">${r.dateStr}</span>
         <span class="mono text-[11px] text-zinc-500">${r.repo ? escapeHtml(r.repo) : ''}</span>
+        ${r.link ? `<a href="${r.link}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="shrink-0 mono text-[11px] px-4 py-2 rounded-full bg-white text-black font-semibold hover:bg-zinc-200 flex items-center gap-1 min-h-[36px]">Open <i data-lucide="external-link" class="w-3 h-3"></i></a>` : ''}
       </div>
       </div>
     </article>`;
@@ -412,6 +414,15 @@ function escapeHtml(s){
   return (s||'').replace(/[&<>"']/g, m=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
 
+function linkFor(u){
+  // ponytail: domain-shaped strings get https://, paths stay text, javascript:/data: never link; full URL validation lib if this misfires
+  const t=(u||'').trim();
+  if(/^https?:\/\//i.test(t)) return t;
+  if(/^(javascript|data|vbscript|file):/i.test(t)) return '';
+  const m=t.match(/^(?!\/)([^\s\\]+\.[a-z]{2,}([/?#][^\s\\]*)?)$/i);
+  return m ? 'https://'+m[1] : '';
+}
+
 // Drawer
 function openDetail(idx){
   const r = VIEW[idx];
@@ -425,13 +436,14 @@ function openDetail(idx){
   if(r.thumbUrl) rows.push(`<img loading="lazy" decoding="async" src="${r.thumbUrl}" alt="Screenshot" onerror="this.remove()" class="w-full rounded-xl border border-zinc-800">`);
   if(r.summary) rows.push(`<div><div class="mono text-xs text-zinc-500 mb-1">Summary</div><p class="text-sm leading-relaxed">${escapeHtml(r.summary)}</p></div>`);
   if(r.core) rows.push(`<div><div class="mono text-xs text-zinc-500 mb-1">Core content</div><p class="text-sm leading-relaxed mono bg-zinc-900 border border-zinc-800 rounded-xl p-3 whitespace-pre-wrap">${escapeHtml(r.core)}</p></div>`);
-  if(r.url) rows.push(`<div class="mono text-xs"><div class="text-zinc-500 mb-1">URL</div><a href="${r.url}" target="_blank" rel="noopener noreferrer" class="text-emerald-400 underline break-all vimium-link">${escapeHtml(r.url)}</a></div>`);
+  if(r.link) rows.push(`<div class="mono text-xs"><div class="text-zinc-500 mb-1">URL</div><a href="${r.link}" target="_blank" rel="noopener noreferrer" class="text-emerald-400 underline break-all vimium-link">${escapeHtml(r.link)}</a></div>`);
+  else if(r.url) rows.push(`<div class="mono text-xs"><div class="text-zinc-500 mb-1">URL</div><p class="text-zinc-400 break-all">${escapeHtml(r.url)}</p></div>`);
   if(r.thumb) rows.push(`<div><div class="mono text-xs text-zinc-500 mb-1">Thumbnail text</div><p class="mono text-xs bg-zinc-900 border border-zinc-800 rounded-xl p-3">${escapeHtml(r.thumb)}</p></div>`);
   rows.push(`<div class="mono text-xs bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-zinc-500">${escapeHtml(r.file_name)} · ${(r.confidence*100).toFixed(0)}% · ${catLabel(r.category)}</div>`);
   if(r.enrichment) rows.push(`<details class="mono text-xs"><summary class="cursor-pointer text-zinc-400">Enrichment (yt-dlp)</summary><pre class="mt-2 bg-zinc-900 border border-zinc-800 rounded-xl p-3 overflow-x-auto">${escapeHtml(JSON.stringify(r.enrichment, null, 2))}</pre></details>`);
   body.innerHTML = rows.join('');
   const a = qs('#dUrl');
-  if(r.url){ a.href = r.url; a.classList.remove('hidden'); } else { a.classList.add('hidden'); }
+  if(r.link){ a.href = r.link; a.classList.remove('hidden'); } else { a.classList.add('hidden'); }
   qs('#drawer').classList.remove('hidden');
   document.body.style.overflow='hidden';
   qs('#closeDrawer').focus();
