@@ -31,6 +31,9 @@
   mark{background:rgba(167,139,250,.35); color:inherit; border-radius:2px; padding:0 1px}
   .sel-ring{outline:2px solid rgba(167,139,250,.7); outline-offset:2px}
   body.noimg #grid img,body.noimg #dBody img{display:none}
+  .drawer-top{display:flex;flex-direction:column;gap:1rem}
+  .drawer-img{width:100%;max-height:11rem;object-fit:cover;object-position:top}
+  @media(min-width:640px){.drawer-top{flex-direction:row-reverse}.drawer-img{width:240px;max-height:60vh;flex-shrink:0}}
   @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
   @supports(padding:max(0px)){header{padding-top:env(safe-area-inset-top)}}
   /* Pixel headline glow like vercel */
@@ -494,9 +497,11 @@ function openItem(r){
   qs('#dMeta').textContent = [r.channel, r.repo, r.dateStr].filter(x=>x && x!=='—').join(' · ');
   const body = qs('#dBody');
   const rows = [];
-  if(r.summary) rows.push(`<div><div class="mono text-xs text-zinc-500 mb-1">Summary</div><p class="text-sm leading-relaxed">${escapeHtml(r.summary)}</p></div>`);
-  if(r.thumbUrl) rows.push(`<img loading="lazy" decoding="async" src="${r.thumbUrl}" alt="Screenshot" onerror="this.remove()" class="w-full max-h-56 object-cover object-top rounded-xl border border-zinc-800">`);
-  if(r.core) rows.push(`<div><div class="mono text-xs text-zinc-500 mb-1">Core content</div><p class="text-sm leading-relaxed mono bg-zinc-900 border border-zinc-800 rounded-xl p-3 whitespace-pre-wrap">${escapeHtml(r.core)}</p></div>`);
+  if(r.summary || r.core || r.thumbUrl){
+    const topTxt = `${r.summary ? `<div><div class="mono text-xs text-zinc-500 mb-1">Summary</div><p class="text-sm leading-relaxed">${escapeHtml(r.summary)}</p></div>` : ''}${r.core ? `<div><div class="mono text-xs text-zinc-500 mb-1">Core content</div><p class="text-sm leading-relaxed mono bg-zinc-900 border border-zinc-800 rounded-xl p-3 whitespace-pre-wrap">${escapeHtml(r.core)}</p></div>` : ''}`;
+    const topImg = r.thumbUrl ? `<img loading="lazy" decoding="async" src="${r.thumbUrl}" alt="Screenshot" onerror="this.remove()" class="drawer-img rounded-xl border border-zinc-800">` : '';
+    rows.push(`<div class="drawer-top">${topTxt ? `<div class="min-w-0 flex-1 space-y-4">${topTxt}</div>` : ''}${topImg}</div>`);
+  }
   if(r.link) rows.push(`<div class="mono text-xs"><div class="text-zinc-500 mb-1">URL</div><a href="${r.link}" target="_blank" rel="noopener noreferrer" class="text-emerald-400 underline break-all vimium-link">${escapeHtml(r.link)}</a></div>`);
   else if(r.url) rows.push(`<div class="mono text-xs"><div class="text-zinc-500 mb-1">URL</div><p class="text-zinc-400 break-all">${escapeHtml(r.url)}</p></div>`);
   if(r.thumb) rows.push(`<div><div class="mono text-xs text-zinc-500 mb-1">Thumbnail text</div><p class="mono text-xs bg-zinc-900 border border-zinc-800 rounded-xl p-3">${escapeHtml(r.thumb)}</p></div>`);
