@@ -3,7 +3,7 @@ services:
     build: .
     container_name: grey-matter
     ports:
-      - "8000:80"  # VPS: change to "80:80" or "443:443" with certbot (grey-matter.isroot.in + archive.isroot.in)
+      - "80:80"  # VPS: change to "80:80" or "443:443" with certbot (grey-matter.isroot.in + archive.isroot.in)
     restart: unless-stopped
     volumes:
       # thumbs are build artifacts (not in git) — scp once, served without rebuild
