@@ -69,6 +69,7 @@ job-search/  (now Grey Matter, was job-search)
     2026-09-02.html       → Heap Day 1 (27 ticks, localStorage, Export .md)
   archive/
     index.html            → Searchable archive of 5340 screenshots — filter by category, search, drawer detail (Geist Pixel), buttons vimium-hintable, yt_dlp_url fallback
+    thumbs/               → derived webp thumbs (640px, q70, gitignored — rebuild via ./scripts/build_thumbs.sh, needs caesiumclt)
     results.enriched.jsonl → 4.8M source (copied for subdomain root)
     results.jsonl
   favicon/
@@ -125,4 +126,11 @@ Add new `.md` to docs viewer: edit `index.html` → `const DOCS = [...]` array.
 
 ```bash
 git pull && docker compose up -d --build && docker compose ps
+```
+
+Thumbs on VPS (not in git — Screenshots/ stays local):
+
+```bash
+cargo install caesium-clt
+./scripts/build_thumbs.sh /path/to/Screenshots
 ```

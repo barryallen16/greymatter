@@ -27,6 +27,8 @@
   ::-webkit-scrollbar-thumb:hover{background:#3f3f46}
   html{-webkit-text-size-adjust:100%; scroll-behavior:smooth}
   body{overscroll-behavior-y:contain}
+  input[type=search]::-webkit-search-cancel-button{display:none}
+  mark{background:rgba(167,139,250,.35); color:inherit; border-radius:2px; padding:0 1px}
   @supports(padding:max(0px)){header{padding-top:env(safe-area-inset-top)}}
   /* Pixel headline glow like vercel */
   .pixel-glow{ text-shadow: 0 0 20px rgba(255,255,255,0.15); }
@@ -43,8 +45,8 @@
         <h1 class="pixel text-[18px] sm:text-[22px] font-bold leading-none pixel-glow">archive<span class="text-zinc-500">.isroot.in</span></h1>
         <p class="mono text-[11px] text-zinc-500 truncate">5340 screenshots · searchable · phone-first · Geist Pixel headlines</p>
       </div>
-      <a href="../" class="hidden sm:flex text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800">Docs →</a>
-      <a href="../roadmaps/" class="hidden sm:flex text-xs px-4 py-2.5 rounded-full bg-white text-black font-semibold hover:bg-zinc-200">Roadmaps →</a>
+      <a href="../" class="flex text-xs px-3 sm:px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800">Docs →</a>
+      <a href="../roadmaps/" class="flex text-xs px-3 sm:px-4 py-2.5 rounded-full bg-white text-black font-semibold hover:bg-zinc-200">Roadmaps →</a>
     </div>
 
     <!-- Search bar -->
@@ -52,10 +54,10 @@
       <div class="flex gap-2">
         <div class="flex-1 relative">
           <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m21 21-4.3-4.3M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z"/></svg>
-          <input id="q" type="search" placeholder="Search title, summary, core content, channel, url, file name…" class="w-full pl-9 pr-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-700 focus:bg-zinc-800" autocomplete="off" spellcheck="false">
-          <button id="clearBtn" class="hidden absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-zinc-700 text-zinc-400 flex items-center justify-center"><i data-lucide="x" class="w-4 h-4"></i></button>
+          <input id="q" type="search" aria-label="Search archive" placeholder="Search — try py, k8s, typos ok…" class="w-full pl-9 pr-10 py-3 rounded-xl bg-zinc-900 border border-zinc-800 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-700 focus:bg-zinc-800" autocomplete="off" spellcheck="false">
+          <button id="clearBtn" aria-label="Clear search" class="hidden absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-zinc-700 text-zinc-400 flex items-center justify-center"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
-        <button id="statsBtn" class="hidden sm:flex items-center gap-2 px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs mono hover:bg-zinc-800"><span id="countLabel">5340</span> <span class="text-zinc-500">items</span></button>
+        <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs mono shrink-0"><span id="countLabel">5340</span></div>
       </div>
 
       <!-- Filters -->
@@ -66,11 +68,10 @@
       <!-- active chips + sort -->
       <div class="flex items-center gap-2 mt-2 text-xs">
         <div id="activeChips" class="flex gap-2 flex-wrap flex-1"></div>
-        <select id="sortSel" class="bg-zinc-900 border border-zinc-800 rounded-full px-3 py-1.5 mono text-xs">
+        <select id="sortSel" aria-label="Sort results" class="bg-zinc-900 border border-zinc-800 rounded-full px-3 py-2.5 mono text-xs min-h-[44px]">
           <option value="recent">Recent first</option>
           <option value="oldest">Oldest first</option>
           <option value="relevance">Relevance</option>
-          <option value="confidence">Confidence</option>
         </select>
       </div>
     </div>
@@ -79,7 +80,7 @@
 
 <!-- Stats strip -->
 <div class="max-w-[1280px] mx-auto w-full px-4 sm:px-6 py-3">
-  <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 text-xs" id="statsGrid">
+  <div class="grid grid-cols-4 sm:grid-cols-7 gap-2 text-xs" id="statsGrid">
     <!-- injected -->
   </div>
 </div>
@@ -107,6 +108,7 @@
 <div id="drawer" class="fixed inset-0 z-50 hidden">
   <div id="drawerBg" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
   <div class="absolute inset-x-0 bottom-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-[720px] bg-zinc-950 border-t sm:border-l border-zinc-800 rounded-t-2xl sm:rounded-none max-h-[92vh] sm:max-h-none flex flex-col overflow-hidden">
+    <div class="sm:hidden pt-2 flex justify-center shrink-0" aria-hidden="true"><div class="w-10 h-1 rounded-full bg-zinc-700"></div></div>
     <div class="flex items-center gap-3 p-4 border-b border-zinc-800 shrink-0">
       <div class="min-w-0 flex-1">
         <div id="dCat" class="mono text-[11px] px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 inline-block"></div>
@@ -127,7 +129,7 @@
   <div class="max-w-[1280px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row gap-3 justify-between text-xs mono text-zinc-600">
     <div>
       <span class="pixel text-zinc-300">Geist</span> Sans + Mono + <span class="pixel">Pixel</span> · built for isroot.in subdomain · works offline after load
-      <br>Source: <code class="bg-zinc-900 px-1 rounded">results.enriched.jsonl</code> 5340 lines → 170 YouTube enriched via yt-dlp
+      <br>Source: <code class="bg-zinc-900 px-1 rounded">results.enriched.jsonl</code> · thumbs are compressed webp (see scripts/build_thumbs.sh)
     </div>
     <div class="flex gap-2">
       <a href="../index.html" class="px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800">Docs</a>
@@ -147,27 +149,29 @@ const DATA_URLS = [
 ];
 let RAW = [];
 let VIEW = [];
+let CUR_TOKS = [];
 let page = 0;
 const PAGE_SIZE = 24; // mobile 24 keeps smooth
 const qs = s => document.querySelector(s);
 
-// State
+// State (restored from URL in init())
 let q = '';
 let cat = 'all';
 let sort = 'recent';
-let confidenceMin = 0;
 
 const CATS = [
   {id:'all', label:'All', count:0},
   {id:'career_advice', label:'Career', count:0},
   {id:'youtube_video', label:'YouTube', count:0},
   {id:'website', label:'Websites', count:0},
-  {id:'visual_text', label:'Visual Text', count:0},
+  {id:'visual_text', label:'Visual', count:0},
   {id:'github_repo', label:'GitHub', count:0},
   {id:'quote', label:'Quotes', count:0},
-  {id:'other', label:'Other', count:0},
-  {id:'none', label:'None', count:0},
+  {id:'other', label:'Other', count:0}, // includes uncategorized (none)
 ];
+
+function catLabel(c){ const f = CATS.find(x=>x.id===c); return f ? f.label : 'Other'; }
+function catMatch(r){ return cat==='all' || r.category===cat || (cat==='other' && r.category==='none'); }
 
 function catColor(c){
   const m = {
@@ -218,7 +222,9 @@ async function load(){
         _raw: j,
         file_name: j.file_name || '',
         file_path: j.file_path || '',
+        thumbUrl: j.file_name ? 'thumbs/' + j.file_name.replace(/\.(jpe?g|png)$/i, '.webp') : '',
         timestamp: j.timestamp || 0,
+        dateStr: j.timestamp ? new Date(j.timestamp*1000).toLocaleDateString() : '—',
         category: catNorm,
         confidence: j.result && j.result.confidence || 0,
         title: ed.title || '',
@@ -233,17 +239,20 @@ async function load(){
       });
     }catch{}
   }
-  // stats
+  // stats (none folds into other)
   const byCat = {};
   RAW.forEach(r=> byCat[r.category]=(byCat[r.category]||0)+1);
   CATS.forEach(c=>{
     if(c.id==='all') c.count = RAW.length;
+    else if(c.id==='other') c.count = (byCat.other||0) + (byCat.none||0);
     else c.count = byCat[c.id] || 0;
   });
   renderFilterBar();
   renderStats();
+  initFromUrl();
   applyFilters();
-  qs('#status').textContent = `Loaded ${RAW.length} items from ${used} · ${CATS.find(c=>c.id==='youtube_video').count} YouTube (170 with URL)`;
+  qs('#status').textContent = `Loaded ${RAW.length} items · ${byCatCount('youtube_video')} YouTube · ${byCatCount('career_advice')} career`;
+  function byCatCount(id){ if(id==='other') return (byCat.other||0)+(byCat.none||0); return byCat[id] || 0; }
 }
 
 function renderFilterBar(){
@@ -253,7 +262,7 @@ function renderFilterBar(){
     const btn = document.createElement('button');
     btn.className = 'shrink-0 snap-start px-3.5 py-2.5 rounded-full border text-xs font-medium mono flex items-center gap-1.5 ' + (c.id===cat ? 'bg-white text-black border-white' : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800');
     btn.innerHTML = `${c.label} <span class="${c.id===cat?'text-zinc-600':'text-zinc-500'}">${c.count}</span>`;
-    btn.onclick = ()=>{ cat=c.id; page=0; renderFilterBar(); applyFilters(); };
+    btn.onclick = ()=> window.setCat(c.id);
     bar.appendChild(btn);
   });
 }
@@ -261,55 +270,91 @@ function renderFilterBar(){
 function renderStats(){
   const g = qs('#statsGrid');
   const items = [
-    ['All', CATS[0].count, 'bg-zinc-900 border-zinc-800'],
-    ['Career', byCatCount('career_advice'), 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'],
-    ['YouTube', byCatCount('youtube_video'), 'bg-red-500/10 border-red-500/20 text-red-300'],
-    ['Websites', byCatCount('website'), 'bg-blue-500/10 border-blue-500/20 text-blue-300'],
-    ['Visual', byCatCount('visual_text'), 'bg-violet-500/10 border-violet-500/20 text-violet-300'],
-    ['GitHub', byCatCount('github_repo'), 'bg-yellow-500/10 border-yellow-500/20 text-yellow-300'],
+    ['all', 'All', CATS[0].count, 'bg-zinc-900 border-zinc-800'],
+    ['career_advice', 'Career', byCatCount('career_advice'), 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'],
+    ['youtube_video', 'YouTube', byCatCount('youtube_video'), 'bg-red-500/10 border-red-500/20 text-red-300'],
+    ['website', 'Websites', byCatCount('website'), 'bg-blue-500/10 border-blue-500/20 text-blue-300'],
+    ['visual_text', 'Visual', byCatCount('visual_text'), 'bg-violet-500/10 border-violet-500/20 text-violet-300'],
+    ['github_repo', 'GitHub', byCatCount('github_repo'), 'bg-yellow-500/10 border-yellow-500/20 text-yellow-300'],
+    ['other', 'Other', byCatCount('other'), 'bg-zinc-800 border-zinc-700 text-zinc-300'],
   ];
-  g.innerHTML = items.map(([k,v,cls])=>`<div class="rounded-xl border p-3 ${cls}"><div class="mono text-[11px] opacity-70">${k}</div><div class="pixel text-xl leading-none">${v}</div></div>`).join('');
-  function byCatCount(id){ return (CATS.find(c=>c.id===id)||{count:0}).count; }
+  g.innerHTML = items.map(([id,k,v,cls])=>`<button type="button" onclick="setCat('${id}')" aria-pressed="${cat===id}" class="text-left rounded-xl border p-3 ${cls} ${cat===id?'ring-2 ring-white/70':''} min-h-[44px]"><div class="mono text-[11px] opacity-70">${k}</div><div class="pixel text-xl leading-none">${v}</div></button>`).join('');
+  function byCatCount(id){ if(id==='other') return (CATS.find(c=>c.id==='other')||{count:0}).count; return (CATS.find(c=>c.id===id)||{count:0}).count; }
 }
+window.setCat = id => { cat = id; page = 0; renderFilterBar(); renderStats(); applyFilters(); syncUrl(); };
 
-function applyFilters(){
+function applyFilters(scroll=false){
+  // ponytail: token-OR + 4-gram fuzzy + tiny synonym map instead of embeddings/vector DB; upgrade when synonym miss-rate hurts (precompute embeddings JSON + cosine)
+  const SYN={js:'javascript',py:'python',k8s:'kubernetes',ml:'machine learning',ai:'artificial intelligence',db:'database',os:'operating system',ts:'typescript',reactjs:'react',nodejs:'node',dsa:'data structures algorithms'};
+  const stem=t=>t.endsWith('s')&&t.length>3?t.slice(0,-1):t;
   const term = q.trim().toLowerCase();
+  const toks = term.split(/\s+/).filter(Boolean).flatMap(t=>[...new Set([t,stem(t),...(SYN[t]||'').split(' ').filter(Boolean)])]);
+  const exactToks = toks.filter(t=>t.length>=3);
+  const score=r=>toks.reduce((s,t)=>s+(r.searchBlob.includes(t)?3:(t.length>=4&&[...Array(t.length-3)].some((_,i)=>r.searchBlob.includes(t.slice(i,i+4)))?1:0)),0);
   VIEW = RAW.filter(r=>{
-    if(cat!=='all' && r.category!==cat) return false;
-    if(confidenceMin && r.confidence < confidenceMin) return false;
+    if(!catMatch(r)) return false;
     if(!term) return true;
-    // simple relevance: all tokens must appear
-    const tokens = term.split(/\s+/).filter(Boolean);
-    return tokens.every(t=> r.searchBlob.includes(t));
+    r._s = score(r);
+    return r._s>0;
   });
-  // sort
-  if(sort==='recent') VIEW.sort((a,b)=> b.timestamp - a.timestamp);
-  else if(sort==='oldest') VIEW.sort((a,b)=> a.timestamp - b.timestamp);
-  else if(sort==='confidence') VIEW.sort((a,b)=> b.confidence - a.confidence);
-  else if(sort==='relevance' && term){
-    // naive score: count token hits in title
-    VIEW.sort((a,b)=>{
-      const score = x => term.split(/\s+/).reduce((s,t)=> s + (x.searchBlob.includes(t)?1:0), 0) + (x.title.toLowerCase().includes(term)?2:0);
-      return score(b)-score(a);
-    });
+  // sort (a query implies relevance unless user picked otherwise)
+  const eff = (term && sort==='recent') ? 'relevance' : sort;
+  if(eff==='recent') VIEW.sort((a,b)=> b.timestamp - a.timestamp);
+  else if(eff==='oldest') VIEW.sort((a,b)=> a.timestamp - b.timestamp);
+  else if(eff==='relevance' && term){
+    // _s already computed in filter above
+    VIEW.sort((a,b)=> (b._s||0)-(a._s||0) + ((b.title.toLowerCase().includes(term)?1:0)-(a.title.toLowerCase().includes(term)?1:0)));
   }
   page = Math.min(page, Math.max(0, Math.ceil(VIEW.length / PAGE_SIZE)-1));
+  CUR_TOKS = exactToks;
   renderActiveChips();
-  renderGrid();
+  renderGrid(scroll);
+}
+
+// URL state (?q=&cat=&sort=&page=) — static-safe, shareable
+function syncUrl(){
+  const p = new URLSearchParams();
+  if(q) p.set('q', q);
+  if(cat!=='all') p.set('cat', cat);
+  if(sort!=='recent') p.set('sort', sort);
+  if(page) p.set('page', page);
+  history.replaceState(null, '', location.pathname + (p.toString() ? '?' + p : ''));
+}
+function initFromUrl(){
+  const p = new URLSearchParams(location.search);
+  q = p.get('q') || '';
+  const c = p.get('cat');
+  if(c && CATS.some(x=>x.id===c)) cat = c;
+  const s = p.get('sort');
+  if(s && ['recent','oldest','relevance'].includes(s)) sort = s;
+  page = Math.max(0, parseInt(p.get('page')||'0', 10) || 0);
+  qs('#q').value = q;
+  qs('#sortSel').value = sort;
+  qs('#clearBtn').classList.toggle('hidden', !q);
+  renderFilterBar();
+  renderStats();
 }
 
 function renderActiveChips(){
   const el = qs('#activeChips');
   const chips = [];
-  if(q) chips.push(`<span class="mono text-xs bg-zinc-800 border border-zinc-700 px-2.5 py-1 rounded-full flex items-center gap-1">“${q}” <button onclick="clearQ()" class="hover:text-white flex items-center"><i data-lucide="x" class="w-3 h-3"></i></button></span>`);
-  if(cat!=='all') chips.push(`<span class="mono text-xs bg-white text-black px-2.5 py-1 rounded-full">${cat}</span>`);
-  if(confidenceMin) chips.push(`<span class="mono text-xs bg-zinc-800 border border-zinc-700 px-2.5 py-1 rounded-full">conf ≥ ${confidenceMin}</span>`);
+  if(q) chips.push(`<span class="mono text-xs bg-zinc-800 border border-zinc-700 px-2.5 py-1 rounded-full flex items-center gap-1">“${escapeHtml(q)}” <button onclick="clearQ()" aria-label="Clear search" class="hover:text-white flex items-center"><i data-lucide="x" class="w-3 h-3"></i></button></span>`);
+  if(cat!=='all') chips.push(`<button onclick="window.setCat('all')" class="mono text-xs bg-white text-black px-2.5 py-1 rounded-full">${catLabel(cat)} ✕</button>`);
   el.innerHTML = chips.join('') || `<span class="mono text-xs text-zinc-600">${VIEW.length} results</span>`;
   if(window.refreshIcons) refreshIcons(el);
   qs('#countLabel').textContent = VIEW.length;
 }
 
-function renderGrid(){
+function highlight(text, toks){
+  let out = escapeHtml(text);
+  (toks||[]).forEach(t=>{
+    if(!t || t.length<3) return;
+    try{ out = out.replace(new RegExp('('+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig'), '<mark>$1</mark>'); }catch{}
+  });
+  return out;
+}
+
+function renderGrid(scroll=false){
   const grid = qs('#grid');
   const pager = qs('#pager');
   const empty = qs('#empty');
@@ -317,6 +362,7 @@ function renderGrid(){
     grid.innerHTML = '';
     pager.classList.add('hidden');
     empty.classList.remove('hidden');
+    qs('#status').textContent = q ? `No matches for “${q}” — try fewer words or check spelling` : 'No matches';
     return;
   }
   empty.classList.add('hidden');
@@ -324,33 +370,36 @@ function renderGrid(){
   const slice = VIEW.slice(start, start+PAGE_SIZE);
   grid.innerHTML = slice.map((r,i)=>{
     const idx = start+i;
-    const title = escapeHtml(r.title || r.summary?.slice(0,80) || r.file_name);
-    const sum = escapeHtml((r.summary || r.core || '').slice(0, 140));
+    const rawTitle = r.title || r.summary?.slice(0,80) || r.file_name;
+    const title = highlight(rawTitle, CUR_TOKS);
+    const sum = highlight((r.summary || r.core || '').slice(0, 140), CUR_TOKS);
     const urlHost = r.url ? (()=>{ try{return new URL(r.url).hostname.replace('www.','')}catch{return r.url.slice(0,30)}})() : '';
-    const enrichBadge = r.enrichment ? `<span class="mono text-[10px] bg-zinc-800 border border-zinc-700 px-1.5 py-0.5 rounded">${r.enrichment.status}</span>` : '';
-    const conf = r.confidence ? `<span class="mono text-[10px] text-zinc-500">${(r.confidence*100).toFixed(0)}%</span>` : '';
-    return `<button type="button" onclick="openDetail(${idx})" class="group text-left w-full cursor-pointer rounded-2xl border border-zinc-800 bg-zinc-900 hover:bg-zinc-800/80 hover:border-zinc-700 p-4 flex flex-col gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/50">
-      <div class="flex items-start gap-2">
-        <span class="mono text-[11px] px-2 py-0.5 rounded-full border ${catColor(r.category)}">${r.category}</span>
-        <span class="ml-auto flex items-center gap-1">${conf} ${enrichBadge}</span>
+    return `<article tabindex="0" role="button" aria-label="${escapeHtml(rawTitle).slice(0,100)}" onclick="openDetail(${idx})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetail(${idx})}" class="group text-left w-full cursor-pointer rounded-2xl border border-zinc-800 bg-zinc-900 hover:bg-zinc-800/80 hover:border-zinc-700 overflow-hidden flex flex-col gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/50">
+      ${r.thumbUrl ? `<img loading="lazy" decoding="async" src="${r.thumbUrl}" alt="" onerror="this.remove()" class="w-full aspect-video object-cover object-top bg-zinc-800">` : ''}
+      <div class="p-4 flex flex-col gap-2 flex-1">
+      <div class="flex items-center gap-2">
+        <span class="mono text-[11px] px-2 py-0.5 rounded-full border ${catColor(r.category)}">${catLabel(r.category)}</span>
+        ${r.confidence ? `<span class="mono text-[10px] text-zinc-500 ml-auto">${(r.confidence*100).toFixed(0)}%</span>` : ''}
       </div>
       <h3 class="font-semibold text-[14px] leading-tight line-clamp-2 group-hover:text-white">${title || '<span class="text-zinc-500">Untitled</span>'}</h3>
       ${sum ? `<p class="mono text-xs text-zinc-400 line-clamp-3 leading-relaxed">${sum}</p>` : ''}
-      ${r.channel ? `<p class="mono text-xs text-zinc-500 truncate">↳ ${escapeHtml(r.channel)}</p>` : ''}
-      ${r.url ? `<p class="mono text-xs text-emerald-400 truncate flex items-center gap-1"><span class="shrink-0">↗</span> ${escapeHtml(urlHost)}</p>` : ''}
+      ${r.channel ? `<p class="mono text-xs text-zinc-500 truncate">${escapeHtml(r.channel)}</p>` : ''}
+      ${r.url ? `<a href="${r.url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="mono text-xs text-emerald-400 truncate flex items-center gap-1 hover:underline"><i data-lucide="external-link" class="w-3 h-3 shrink-0"></i>${escapeHtml(urlHost)}</a>` : ''}
       <div class="flex items-center gap-2 mt-auto pt-2 border-t border-zinc-800">
-        <span class="mono text-[11px] text-zinc-600 truncate flex-1">${r.file_name}</span>
+        <span class="mono text-[11px] text-zinc-600 truncate flex-1">${r.dateStr}</span>
         <span class="mono text-[11px] text-zinc-500">${r.repo ? escapeHtml(r.repo) : ''}</span>
       </div>
-    </button>`;
+      </div>
+    </article>`;
   }).join('');
+  if(window.refreshIcons) refreshIcons(grid);
   // pager
   const pages = Math.ceil(VIEW.length / PAGE_SIZE);
   pager.classList.remove('hidden');
   qs('#pageLabel').textContent = `Page ${page+1} / ${pages} · ${VIEW.length} items`;
   qs('#prevBtn').disabled = page===0;
   qs('#nextBtn').disabled = page>=pages-1;
-  window.scrollTo({top:0, behavior:'smooth'});
+  if(scroll) window.scrollTo({top:0, behavior:'smooth'});
 }
 
 function escapeHtml(s){
@@ -361,24 +410,25 @@ function escapeHtml(s){
 function openDetail(idx){
   const r = VIEW[idx];
   if(!r) return;
-  qs('#dCat').textContent = r.category;
+  qs('#dCat').textContent = catLabel(r.category);
   qs('#dCat').className = 'mono text-[11px] px-2 py-0.5 rounded-full border ' + catColor(r.category);
   qs('#dTitle').textContent = r.title || r.summary || r.file_name;
-  qs('#dMeta').textContent = [r.channel, r.repo, new Date(r.timestamp*1000).toLocaleDateString(), r.file_name].filter(Boolean).join(' · ');
+  qs('#dMeta').textContent = [r.channel, r.repo, r.dateStr].filter(x=>x && x!=='—').join(' · ');
   const body = qs('#dBody');
   const rows = [];
+  if(r.thumbUrl) rows.push(`<img loading="lazy" decoding="async" src="${r.thumbUrl}" alt="Screenshot" onerror="this.remove()" class="w-full rounded-xl border border-zinc-800">`);
   if(r.summary) rows.push(`<div><div class="mono text-xs text-zinc-500 mb-1">Summary</div><p class="text-sm leading-relaxed">${escapeHtml(r.summary)}</p></div>`);
   if(r.core) rows.push(`<div><div class="mono text-xs text-zinc-500 mb-1">Core content</div><p class="text-sm leading-relaxed mono bg-zinc-900 border border-zinc-800 rounded-xl p-3 whitespace-pre-wrap">${escapeHtml(r.core)}</p></div>`);
   if(r.url) rows.push(`<div class="mono text-xs"><div class="text-zinc-500 mb-1">URL</div><a href="${r.url}" target="_blank" rel="noopener noreferrer" class="text-emerald-400 underline break-all vimium-link">${escapeHtml(r.url)}</a></div>`);
   if(r.thumb) rows.push(`<div><div class="mono text-xs text-zinc-500 mb-1">Thumbnail text</div><p class="mono text-xs bg-zinc-900 border border-zinc-800 rounded-xl p-3">${escapeHtml(r.thumb)}</p></div>`);
-  rows.push(`<div class="grid grid-cols-2 gap-3 mono text-xs"><div class="bg-zinc-900 border border-zinc-800 rounded-xl p-3"><div class="text-zinc-500">File</div><div class="truncate">${escapeHtml(r.file_path || r.file_name)}</div></div><div class="bg-zinc-900 border border-zinc-800 rounded-xl p-3"><div class="text-zinc-500">Confidence</div><div>${(r.confidence*100).toFixed(0)}% · ${r.category}</div></div></div>`);
-  if(r.enrichment) rows.push(`<div><div class="mono text-xs text-zinc-500 mb-1">Enrichment (yt-dlp)</div><pre class="mono text-xs bg-zinc-900 border border-zinc-800 rounded-xl p-3 overflow-x-auto">${escapeHtml(JSON.stringify(r.enrichment, null, 2))}</pre></div>`);
-  rows.push(`<details class="mono text-xs"><summary class="cursor-pointer text-zinc-400">Raw JSON</summary><pre class="mt-2 bg-zinc-900 border border-zinc-800 rounded-xl p-3 overflow-x-auto">${escapeHtml(JSON.stringify(r._raw, null, 2))}</pre></details>`);
+  rows.push(`<div class="mono text-xs bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-zinc-500">${escapeHtml(r.file_name)} · ${(r.confidence*100).toFixed(0)}% · ${catLabel(r.category)}</div>`);
+  if(r.enrichment) rows.push(`<details class="mono text-xs"><summary class="cursor-pointer text-zinc-400">Enrichment (yt-dlp)</summary><pre class="mt-2 bg-zinc-900 border border-zinc-800 rounded-xl p-3 overflow-x-auto">${escapeHtml(JSON.stringify(r.enrichment, null, 2))}</pre></details>`);
   body.innerHTML = rows.join('');
   const a = qs('#dUrl');
   if(r.url){ a.href = r.url; a.classList.remove('hidden'); } else { a.classList.add('hidden'); }
   qs('#drawer').classList.remove('hidden');
   document.body.style.overflow='hidden';
+  qs('#closeDrawer').focus();
 }
 function closeDrawer(){
   qs('#drawer').classList.add('hidden');
@@ -390,19 +440,22 @@ window.openDetail = openDetail;
 window.closeDrawer = closeDrawer;
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !qs('#drawer').classList.contains('hidden')) closeDrawer(); });
 
-// Events
+// Events (input debounced 150ms — 5k-item fuzzy scan per keystroke)
+let deb = null;
 qs('#q').addEventListener('input', e=>{
   q = e.target.value;
   qs('#clearBtn').classList.toggle('hidden', !q);
-  page=0;
-  applyFilters();
+  page = 0;
+  clearTimeout(deb);
+  deb = setTimeout(()=>{ applyFilters(); syncUrl(); }, 150);
 });
-qs('#clearBtn').onclick = ()=>{ qs('#q').value=''; q=''; qs('#clearBtn').classList.add('hidden'); page=0; applyFilters(); };
-window.clearQ = ()=>{ qs('#q').value=''; q=''; qs('#clearBtn').classList.add('hidden'); applyFilters(); };
-window.clearAll = ()=>{ q=''; cat='all'; sort='recent'; qs('#q').value=''; renderFilterBar(); qs('#sortSel').value='recent'; applyFilters(); };
-qs('#sortSel').onchange = e=>{ sort=e.target.value; applyFilters(); };
-qs('#prevBtn').onclick = ()=>{ if(page>0){ page--; renderGrid(); }};
-qs('#nextBtn').onclick = ()=>{ page++; renderGrid(); };
+qs('#clearBtn').onclick = ()=>{ qs('#q').value=''; q=''; qs('#clearBtn').classList.add('hidden'); page=0; applyFilters(); syncUrl(); };
+window.clearQ = ()=>{ qs('#q').value=''; q=''; qs('#clearBtn').classList.add('hidden'); page=0; applyFilters(); syncUrl(); };
+window.clearAll = ()=>{ q=''; cat='all'; sort='recent'; page=0; qs('#q').value=''; qs('#clearBtn').classList.add('hidden'); renderFilterBar(); renderStats(); qs('#sortSel').value='recent'; applyFilters(); syncUrl(); };
+qs('#sortSel').onchange = e=>{ sort=e.target.value; page=0; applyFilters(); syncUrl(); };
+const lastPage = ()=> Math.max(0, Math.ceil(VIEW.length / PAGE_SIZE)-1);
+qs('#prevBtn').onclick = ()=>{ if(page>0){ page--; renderGrid(true); syncUrl(); }};
+qs('#nextBtn').onclick = ()=>{ if(page<lastPage()){ page++; renderGrid(true); syncUrl(); }};
 
 // Init
 load();
