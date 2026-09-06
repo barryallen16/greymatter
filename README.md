@@ -35,27 +35,27 @@ Then `docker compose up -d --build` and open `http://YOUR_VPS_IP/`.
 
 ### With domain + HTTPS (isroot.in subdomain)
 
-You created `greymatter.isroot.in` + `archive.isroot.in` (A records → YOUR_VPS_IP).
+You created `greymatter.isroot.in` (A record → YOUR_VPS_IP). The archive lives at `https://greymatter.isroot.in/archive/` — no second subdomain needed.
 
-**Option A — path based (no DNS):** `http://YOUR_VPS_IP:8000/archive/` already works.
+**Option A — path based (no DNS):** `http://YOUR_VPS_IP/archive/` already works.
 
-**Option B — subdomain (pretty):**
-- `https://greymatter.isroot.in` → `nginx` `server_name greymatter.isroot.in` serves `/` (docs)
-- `https://archive.isroot.in` → `nginx` `server_name archive.isroot.in` serves `/archive/` as root (uses `archive/results.enriched.jsonl` + `yt_dlp_url` fallback)
+**Option B — subdomain (pretty):** `https://greymatter.isroot.in` → `nginx` `server_name greymatter.isroot.in` serves `/` (roadmaps landing). Archive at `/archive/` on the same domain.
 
 ```bash
-# HTTPS for both
-sudo apt install certbot python3-certbot-nginx -y
-sudo certbot --nginx -d greymatter.isroot.in -d archive.isroot.in
-# certbot auto-detects both server blocks in nginx.conf
+# One-time: A record greymatter → VPS IP, then on VPS:
+sudo apt install -y certbot
+mkdir -p ~/greymatter/certbot-www && cd ~/greymatter && git pull
+docker compose stop                          # free port 80 for the first issuance only
+sudo certbot certonly --standalone -d greymatter.isroot.in
+docker compose up -d --build --wait          # serves 443 from here on
+# Renewals are zero-downtime (webroot via running container) + automatic via certbot timer.
+# Verify renewal path once: sudo certbot renew --dry-run
 ```
 
-**Test subdomain locally before DNS:**
+**Test domain locally before DNS (from VPS):**
 ```bash
-curl -H "Host: greymatter.isroot.in" http://YOUR_VPS_IP/health
+curl -k --resolve greymatter.isroot.in:443:127.0.0.1 https://greymatter.isroot.in/health
 # → ok greymatter
-curl -H "Host: archive.isroot.in" http://YOUR_VPS_IP/health
-# → ok archive
 ```
 
 ## What's where
@@ -79,7 +79,7 @@ job-search/  (now Grey Matter, was job-search)
     favicon.ico, favicon-32x32.png, favicon-16x16.png, apple-touch-icon.png, 192/512, site.webmanifest
   static/
     css/tailwind.css (44K, built, no CDN), css/fonts.css (GeistPixel alias → local Square.ttf), js/pixel-icons.js, fonts/*.ttf, icons/pixel/*.svg
-  Dockerfile + nginx.conf (greymatter.isroot.in + archive.isroot.in) + docker-compose.yml  → host anywhere
+  Dockerfile + nginx.conf (greymatter.isroot.in, HTTP→HTTPS + ACME) + docker-compose.yml  → host anywhere
   scripts/enrich_yt_urls_ytdlp.py  → rebuild youtube_urls.csv if needed
   results.jsonl / results.enriched.jsonl → data (5M, .gitignore)
 ```
@@ -115,13 +115,13 @@ Add new `.md` to docs viewer: edit `index.html` → `const DOCS = [...]` array.
 * ✅ Roadmaps persist via `localStorage` (key `roadmap-YYYY-MM-DD`)
 * ✅ Vimium: archive cards now `<button>` hintable via `f`, `Escape` closes drawer, links `rel="noopener noreferrer"`
 * ✅ Favicon at `favicon/` (no portfolio), GeistPixel alias → local `GeistPixel-Square.ttf` (no 404), Tailwind local (no CDN warning)
-* ✅ `nginx.conf` gzip, cache (assets 1h, html no-cache), security headers, `/health` + `/archive/` + `greymatter.isroot.in` + `archive.isroot.in` blocks
+* ✅ `nginx.conf` gzip, cache (assets 1h, html no-cache), security headers, `/health` + `/archive/` + `greymatter.isroot.in` 443 + HTTP→HTTPS blocks
 * ✅ `Dockerfile` alpine <10MB + `HEALTHCHECK`
 * ✅ `.dockerignore` + `.gitignore` keep image/repo small (`ats-resume-creation-skill/` now ignored)
 
 ## Troubleshooting
 
-* **Phone shows “Can’t load markdown”** → you opened `file://`, need `http://VPS_IP:8000/`
+* **Phone shows “Can’t load markdown”** → you opened `file://`, need `http://VPS_IP/` (or `https://greymatter.isroot.in/docs/`)
 * **Ticks reset** → different browser/device = different `localStorage`. Export .md daily as backup.
 * **Port 8000 blocked on VPS** → `sudo ufw allow 8000` or switch to 80
 

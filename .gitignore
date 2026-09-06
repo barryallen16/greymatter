@@ -5,6 +5,7 @@ youtube_urls.txt
 # Raw screenshots (2.9G, local only) + derived webp thumbs (rebuild via scripts/build_thumbs.sh)
 Screenshots/
 archive/thumbs/
+certbot-www/
 
 # OS / IDE artifacts
 .DS_Store

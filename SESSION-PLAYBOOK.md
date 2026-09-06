@@ -6,7 +6,7 @@ Read first in any new session.
 
 - Local: `C:/Users/rjaya/Desktop/job-search` (`origin → https://github.com/barryallen16/greymatter.git`, `main`)
 - Pages: `https://barryallen16.github.io/greymatter/` = subpath `/greymatter/`
-- VPS: `ssh partha` (`ubuntu`, `140.245.196.45`, Oracle). Subdomains: `greymatter.isroot.in`, `archive.isroot.in` (optional)
+- VPS: `ssh partha` (`ubuntu`, `140.245.196.45`, Oracle). Domain: `greymatter.isroot.in` only (no www/archive subdomains — cert is single-name, archive lives at `/archive/`).
 - Stack: static HTML + local `static/css/tailwind.css` + Geist + pixel icons. No backend. No emoji.
 
 ## 1. Iron rules
@@ -60,8 +60,8 @@ for p in "/" "/archive/" "/roadmaps/" "/roadmaps/2026-09-02.html" "/static/css/t
 
 - Open 80/443 at **VCN Security List** (Networking → VCN → Security Lists → Ingress `0.0.0.0/0` TCP 80+443) AND host `iptables -I INPUT ... --dport 80/443 -j ACCEPT`. `ufw` inactive = fine.
 - One nginx on :80: `sudo systemctl stop/disable nginx`; docker `["80:80","443:443"]` + volumes `./:/usr/share/nginx/html:ro`, `/etc/letsencrypt:/etc/letsencrypt:ro`.
-- Certbot `--webroot -w /home/ubuntu/grey-matter` (standalone fails behind docker). Verify `/.well-known/.../test → ok` first. Limit: 5 failures/hour/domain.
-- YAML via `cat > file <<'YAML'`, never pasted as commands. `archive.isroot.in` optional (1 subdomain/hour). `scp file partha:/tmp/` → `sudo mv` + `chown` + `nginx -t && reload`.
+- Cert: single-name `greymatter.isroot.in`. First issuance needs `docker compose stop` (free :80) + `certbot certonly --standalone`; renewals are webroot via running container (automatic). No www/archive subdomains.
+- YAML via `cat > file <<'YAML'`, never pasted as commands. `scp file partha:/tmp/` → `sudo mv` + `chown` + `nginx -t && reload`. Cert rate limit: 5 failures/hour/domain.
 
 ## 7. Session end
 
