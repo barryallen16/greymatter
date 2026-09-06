@@ -18,7 +18,6 @@ __.pycache__
 *.env.local
 
 # Docker / build tmp
-.dockerignore
 *.log
 
 # Node / Tailwind build artifacts (keep tailwind.css, ignore source map and modules)
