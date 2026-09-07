@@ -19,7 +19,7 @@
   .mono{font-family:"Geist Mono",monospace}
   .pixel{font-family:"GeistPixel","Geist",sans-serif;letter-spacing:-0.02em}
   html{-webkit-text-size-adjust:100%}
-  input,select,textarea{font-size:16px}
+  input,select,textarea{font-size:16px !important}
   @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
   @supports(padding:max(0px)){body{padding-top:env(safe-area-inset-top)}}
 </style>
@@ -36,12 +36,13 @@
   <div class="flex items-end gap-3">
     <div class="flex-1 min-w-0">
       <h1 class="pixel text-2xl font-bold">Tracker</h1>
-      <p class="text-sm text-zinc-500 mono mt-1"><span id="countLabel">0</span> applications · synced to server · export .md as backup</p>
+      <p class="text-sm text-zinc-500 mono mt-1"><span id="countLabel">0</span> applications · <span id="todayLabel">0 today</span> · <span id="saveState">synced to server</span></p>
     </div>
     <button onclick="exportMD()" class="shrink-0 text-xs px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[44px]">Export .md</button>
   </div>
 
   <div class="flex gap-2 mt-4 overflow-x-auto pb-1" id="stageBar" style="scrollbar-width:none"></div>
+  <div id="followupBar" style="display:none" class="mt-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-xs mono text-amber-300"></div>
 
   <form id="addForm" class="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4 space-y-3">
     <div class="grid sm:grid-cols-2 gap-3">
@@ -80,6 +81,8 @@
   </div>
 </div>
 
+<div id="toast" role="status" style="display:none;bottom:calc(1rem + env(safe-area-inset-bottom))" class="fixed left-1/2 -translate-x-1/2 z-50 max-w-[calc(100vw-2rem)] items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg"></div>
+
 <script>
 const KEY = 'tracker-apps-v1';
 const STAGES = [
@@ -96,7 +99,15 @@ let filter = 'all';
 const qs = s => document.querySelector(s);
 
 async function load(){ apps = await storeGet(KEY) || []; }
-async function save(){ await storeSet(KEY, apps); }
+function setSaveState(state){
+  qs('#saveState').textContent = state==='saving' ? 'saving…'
+    : state==='ok' ? 'saved ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})
+    : 'saved in this browser (server unreachable)';
+}
+async function save(){
+  setSaveState('saving');
+  setSaveState(await storeSet(KEY, apps) ? 'ok' : 'local');
+}
 function esc(s){ return (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function stageLabel(id){ const f = STAGES.find(x=>x.id===id); return f ? f.label : id; }
 function stageCls(id){ const f = STAGES.find(x=>x.id===id); return (f && f.cls) || STAGES[1].cls; }
@@ -104,15 +115,28 @@ function fmtDate(ts){ try{ return new Date(ts).toLocaleDateString('en-GB',{day:'
 
 function counts(){ const c = {all: apps.length}; STAGES.slice(1).forEach(s=> c[s.id] = apps.filter(a=>a.status===s.id).length); return c; }
 
+function renderFollowups(){
+  const today = new Date().toISOString().slice(0,10);
+  const due = apps.filter(a=> a.followup && a.followup <= today && a.status !== 'offer' && a.status !== 'rejected')
+                  .sort((a,b)=> a.followup.localeCompare(b.followup));
+  const el = qs('#followupBar');
+  if(!due.length){ el.style.display = 'none'; return; }
+  el.style.display = '';
+  el.textContent = due.length + (due.length===1 ? ' follow-up due: ' : ' follow-ups due: ')
+    + due.map(a=>`${a.company} (${a.followup})`).join(' · ');
+}
+
 function renderStages(){
   const c = counts();
   qs('#stageBar').innerHTML = STAGES.map(s=>`<button type="button" onclick="setFilter('${s.id}')" aria-pressed="${filter===s.id}" class="shrink-0 px-3.5 py-2.5 rounded-full border text-xs font-medium mono flex items-center gap-1.5 min-h-[44px] ${filter===s.id ? 'bg-white text-black border-white' : 'bg-zinc-900 text-zinc-300 border-zinc-800'}">${s.label} <span class="${filter===s.id ? 'text-zinc-600' : 'text-zinc-500'}">${c[s.id]||0}</span></button>`).join('');
+  renderFollowups();
 }
 window.setFilter = id => { filter = id; renderStages(); renderList(); };
 
 function renderList(){
   const rows = apps.filter(a=> filter==='all' || a.status===filter).sort((a,b)=> b.created - a.created);
   qs('#countLabel').textContent = apps.length;
+  qs('#todayLabel').textContent = apps.filter(a=> a.created >= new Date().setHours(0,0,0,0)).length + ' today';
   qs('#empty').style.display = apps.length ? 'none' : '';
   qs('#list').innerHTML = rows.map(a=>`
     <div class="rounded-2xl border ${a.status==='rejected' ? 'border-zinc-800/60 bg-zinc-900/40 opacity-70' : 'border-zinc-800 bg-zinc-900'} p-4">
@@ -133,22 +157,71 @@ function renderList(){
           ${STAGES.slice(1).map(s=>`<option value="${s.id}"${a.status===s.id ? ' selected' : ''}>${s.label}</option>`).join('')}
         </select>
         ${a.link ? `<a href="${esc(a.link)}" target="_blank" rel="noopener noreferrer" class="shrink-0 px-4 py-2 rounded-xl bg-white text-black text-xs font-semibold hover:bg-zinc-200 flex items-center min-h-[44px]">Open</a>` : ''}
+        <button onclick="editLink('${a.id}')" aria-label="Edit job posting link" class="shrink-0 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 text-xs mono min-h-[44px]">${a.link ? 'Edit link' : 'Add link'}</button>
         <button onclick="delApp('${a.id}')" aria-label="Delete" class="shrink-0 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-500 hover:text-red-400 hover:border-red-500/40 min-h-[44px]"><i data-lucide="trash" class="w-4 h-4 pointer-events-none"></i></button>
       </div>
     </div>`).join('');
   if(window.refreshIcons) refreshIcons(qs('#list'));
 }
-window.setStatus = (id, st) => { const a = apps.find(x=>x.id===id); if(a){ a.status = st; save(); renderStages(); renderList(); } };
-window.delApp = id => { const a = apps.find(x=>x.id===id); if(a && confirm(`Delete ${a.company} — ${a.role}?`)){ apps = apps.filter(x=>x.id!==id); save(); renderStages(); renderList(); } };
+
+let toastTimer;
+function toast(msg, actionLabel, actionFn, cls){
+  const el = qs('#toast');
+  el.className = `fixed left-1/2 -translate-x-1/2 z-50 max-w-[calc(100vw-2rem)] flex items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg ${cls || 'border-zinc-700 bg-zinc-900 text-zinc-100'}`;
+  el.innerHTML = `<span class="min-w-0 truncate">${msg}</span>`
+    + (actionLabel ? `<button type="button" class="shrink-0 mono text-xs px-3 py-2 rounded-lg bg-white text-black font-semibold min-h-[44px]">${actionLabel}</button>` : '');
+  if(actionLabel) el.querySelector('button').onclick = () => { actionFn(); el.style.display='none'; };
+  el.style.display = 'flex';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ el.style.display='none'; }, actionLabel ? 6000 : 3500);
+}
+
+window.setStatus = (id, st) => {
+  const a = apps.find(x=>x.id===id);
+  if(!a) return;
+  const newOffer = st==='offer' && a.status!=='offer';
+  a.status = st; save(); renderStages(); renderList();
+  if(newOffer) toast(`Offer — ${esc(a.company)}`, null, null, 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300');
+};
+function normUrl(t){
+  t = (t||'').trim();
+  if(!t) return '';
+  if(/^https?:\/\//i.test(t)) return t;
+  if(/^(javascript|data|vbscript|file):/i.test(t)) return '';
+  return /^[\w-]+(\.[\w-]+)+([\/?#]\S*)?$/.test(t) ? 'https://'+t : t;
+}
+window.editLink = id => {
+  const a = apps.find(x=>x.id===id);
+  if(!a) return;
+  const v = prompt('Job posting URL (clear the field to remove):', a.link || '');
+  if(v === null) return;
+  const t = normUrl(v);
+  if(v.trim() && !t){ toast('That does not look like a URL — not saved', null, null, 'border-amber-500/40 bg-amber-500/10 text-amber-300'); return; }
+  const had = !!a.link;
+  a.link = t; save(); renderList();
+  toast(t ? (had ? 'Link updated' : 'Link added') : 'Link removed');
+};
+window.delApp = id => {
+  const a = apps.find(x=>x.id===id);
+  if(!a) return;
+  const idx = apps.indexOf(a);
+  apps.splice(idx,1); save(); renderStages(); renderList();
+  toast(`Deleted ${esc(a.company)} — ${esc(a.role)}`, 'Undo', ()=>{
+    apps.splice(idx,0,a); save(); renderStages(); renderList();
+  });
+};
 
 qs('#addForm').addEventListener('submit', e=>{
   e.preventDefault();
   const company = qs('#fCompany').value.trim(), role = qs('#fRole').value.trim();
   if(!company || !role) return;
+  const dup = apps.find(x=> x.company.toLowerCase()===company.toLowerCase() && x.role.toLowerCase()===role.toLowerCase());
+  if(dup && !confirm(`Already logged ${company} — ${role} (${stageLabel(dup.status)}). Add anyway?`)) return;
   apps.push({ id: 'a' + Date.now().toString(36) + Math.floor(Math.random()*1e4).toString(36),
     company, role, link: qs('#fLink').value.trim(), type: qs('#fType').value,
     status: qs('#fStatus').value, followup: qs('#fFollowup').value, notes: qs('#fNotes').value.trim(), created: Date.now() });
-  save(); e.target.reset(); renderStages(); renderList();
+  save(); e.target.reset(); prefillFollowup(); renderStages(); renderList();
+  qs('#fCompany').focus();
 });
 
 window.exportMD = () => {
@@ -162,8 +235,11 @@ window.exportMD = () => {
   a.download = 'job-tracker.md'; a.click();
 };
 
-{ const d = new Date(Date.now() + 7*864e5), p = n => String(n).padStart(2,'0');
-  qs('#fFollowup').value = `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; }
+function prefillFollowup(){
+  const d = new Date(Date.now() + 7*864e5), p = n => String(n).padStart(2,'0');
+  qs('#fFollowup').value = `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+}
+prefillFollowup();
 load().then(()=>{ renderStages(); renderList(); });
 if(window.refreshIcons) refreshIcons(document.body);
 </script>

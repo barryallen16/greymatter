@@ -22,6 +22,7 @@
   ::-webkit-scrollbar{width:8px;height:8px}
   ::-webkit-scrollbar-thumb{background:#3f3f46;border-radius:8px}
   .tick{width:20px;height:20px;min-width:20px; accent-color:#10b981; touch-action:manipulation}
+  @media (pointer:coarse){.tick{width:26px;height:26px;min-width:26px}}
   .tick:checked+span{text-decoration:line-through;opacity:0.55}
   .progress{transition:width .3s ease}
   html{ -webkit-text-size-adjust: 100%; }
@@ -35,7 +36,7 @@
   <div class="max-w-4xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between gap-3 sm:gap-4">
     <div class="min-w-0 flex-1">
       <h1 class="text-base sm:text-lg font-bold truncate">2026-09-02 <span class="text-zinc-500 font-normal">· Heap Day 1</span></h1>
-      <p class="text-[11px] sm:text-xs text-zinc-500 mono truncate">Floors not ceilings · <span id="dateStr"></span> · Streak beats perfection</p>
+      <p class="text-[11px] sm:text-xs text-zinc-500 mono truncate">Floors not ceilings · <span id="dateStr"></span> · <span id="saveState"></span></p>
     </div>
     <div class="text-right shrink-0">
       <div class="text-sm font-semibold"><span id="doneCount">0</span>/<span id="totalCount">0</span></div>
@@ -54,6 +55,7 @@
 </header>
 
 <main class="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-5">
+  <div id="doneBanner" class="hidden rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-4 text-center text-sm"><span class="font-bold text-emerald-300">Day complete.</span> <span class="text-zinc-300">Export .md as backup — streak &gt; perfection.</span></div>
 
   <section class="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
     <h2 class="font-bold text-emerald-400 text-sm flex items-center gap-2"><i data-lucide="rocket" class="w-4 h-4"></i> Today's Edge</h2>
@@ -65,7 +67,7 @@
       <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2"><strong>Type D</strong><br><span class="text-zinc-500">ML from scratch</span></div>
     </div>
     <p class="text-xs text-zinc-400 mt-3">Before you apply anywhere today — classify the JD (A/B/C/D) then copy-paste to recruiter:</p>
-    <div class="mt-2 bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs leading-relaxed">“I want to come as prepared as I possibly can. Since there are so many focus areas right now, I'd really appreciate any guidance on what to prioritize for this role — DSA, system design, or portfolio deep-dive?” <button onclick="navigator.clipboard.writeText(this.previousSibling.textContent)" class="ml-2 text-emerald-400 underline">Copy</button></div>
+    <div class="mt-2 bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs leading-relaxed">“I want to come as prepared as I possibly can. Since there are so many focus areas right now, I'd really appreciate any guidance on what to prioritize for this role — DSA, system design, or portfolio deep-dive?” <button onclick="copyRecruiter(this)" class="ml-2 text-emerald-400 underline">Copy</button></div>
   </section>
 
   <section class="grid sm:grid-cols-2 gap-4">
@@ -172,8 +174,9 @@
 
   <div class="text-center text-xs text-zinc-600 mono py-4">
     21:00 free — guilt free. 23:00 lights out. 8h sleep or heap is wasted.
-  </div>
-</main>
+  </div></main>
+
+<div id="toast" role="status" style="display:none;bottom:calc(1rem + env(safe-area-inset-bottom))" class="fixed left-1/2 -translate-x-1/2 z-50 max-w-[calc(100vw-2rem)] items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg"></div>
 
 <script src="../static/js/storage.js"></script>
 <script>
@@ -186,27 +189,51 @@
     checks.forEach(c=>{ if(s[c.dataset.id]) c.checked=true; });
     update();
   }
-  async function save(){
-    const s={};
-    checks.forEach(c=>{ s[c.dataset.id]=c.checked; });
-    if(!await storeSet(KEY, s)) warnStore();
+  function setSaveState(state){
+    document.getElementById('saveState').textContent = state==='saving' ? 'saving…'
+      : state==='ok' ? 'saved'
+      : 'NOT saved — server unreachable';
   }
-  function warnStore(){
-    let d=document.getElementById('storeWarn');
-    if(d){ d.classList.remove('hidden'); return; }
-    d=document.createElement('div');
-    d.id='storeWarn';
-    d.className='rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-xs text-red-300';
-    d.textContent='Browser storage is blocked — ticks will NOT survive a reload. Allow site data for this site, or use Export .md as backup.';
-    document.querySelector('main').prepend(d);
+  async function save(){
+    setSaveState('saving');
+    setSaveState(await storeSet(KEY, await (async()=>{ const s={}; checks.forEach(c=>{ s[c.dataset.id]=c.checked; }); return s; })()) ? 'ok' : 'local');
   }
   function update(){
     const done=[...checks].filter(c=>c.checked).length;
     document.getElementById('doneCount').textContent=done;
     document.getElementById('progressBar').style.width=(done/checks.length*100)+'%';
+    const banner=document.getElementById('doneBanner');
+    if(banner){
+      const wasDone=banner.dataset.done==='1';
+      const isDone=checks.length && done===checks.length;
+      banner.classList.toggle('hidden', !isDone);
+      if(isDone && !wasDone) toast('Day complete — '+done+'/'+checks.length+' ticks', null, null, 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300');
+      banner.dataset.done=isDone?'1':'0';
+    }
   }
   checks.forEach(c=>c.addEventListener('change',()=>{save();update();}));
-  async function resetDay(){ if(confirm('Reset today?')){await storeDel(KEY); checks.forEach(c=>c.checked=false); update();}}
+  function resetDay(){
+    lastState={}; checks.forEach(c=>{ lastState[c.dataset.id]=c.checked; });
+    if(!confirm('Reset all ticks for today?')) return;
+    storeDel(KEY); checks.forEach(c=>c.checked=false); update();
+    toast('Ticks cleared', 'Undo', undoReset);
+  }
+  function undoReset(){
+    storeSet(KEY, lastState); checks.forEach(c=>{ c.checked=!!lastState[c.dataset.id]; }); update();
+  }
+  let lastState={};
+
+  let toastTimer;
+  function toast(msg, actionLabel, actionFn, cls){
+    const el=document.getElementById('toast');
+    el.className=`fixed left-1/2 -translate-x-1/2 z-50 max-w-[calc(100vw-2rem)] flex items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg ${cls || 'border-zinc-700 bg-zinc-900 text-zinc-100'}`;
+    el.innerHTML=`<span class="min-w-0 truncate">${msg}</span>`+(actionLabel?`<button type="button" class="shrink-0 mono text-xs px-3 py-2 rounded-lg bg-white text-black font-semibold min-h-[44px]">${actionLabel}</button>`:'');
+    if(actionLabel) el.querySelector('button').onclick=()=>{ actionFn(); el.style.display='none'; };
+    el.style.display='flex';
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>{ el.style.display='none'; }, actionLabel?6000:3500);
+  }
+
   function exportMD(){
     let md='# 2026-09-02 Roadmap\n\nProgress '+document.getElementById('doneCount').textContent+'/'+document.getElementById('totalCount').textContent+'\n\n';
     checks.forEach(c=>{
@@ -230,13 +257,28 @@
         const m = line.match(/^-\s*\[(x| )\]\s*(.+)$/i);
         if(m) map[m[2].trim().replace(/\s+/g,' ').toLowerCase()] = m[1].toLowerCase()==='x';
       });
+      let matched=0;
       checks.forEach(c=>{
         const label = c.parentElement.innerText.trim().replace(/\s+/g,' ').toLowerCase();
-        if(label in map) c.checked = map[label];
+        if(label in map){ c.checked = map[label]; matched++; }
       });
       save(); update();
+      const total = Object.keys(map).length;
+      toast(matched ? `Imported ${matched}/${total} tasks` : 'No tasks matched this file — labels must match the page', null, null, matched ? null : 'border-amber-500/40 bg-amber-500/10 text-amber-300');
     };
     r.readAsText(file);
+  }
+  function copyRecruiter(btn){
+    const text = btn.previousSibling.textContent.trim();
+    const done = () => { const t = btn.textContent; btn.textContent = 'Copied'; setTimeout(()=>{ btn.textContent = t; }, 1500); };
+    try{ navigator.clipboard.writeText(text).then(done, ()=>{ toast('Copy blocked — select the text manually', null, null, 'border-amber-500/40 bg-amber-500/10 text-amber-300'); }); }
+    catch{ toast('Copy blocked — select the text manually', null, null, 'border-amber-500/40 bg-amber-500/10 text-amber-300'); }
+  }
+  function copyRecruiter(btn){
+    const text = btn.previousSibling.textContent.trim();
+    const done = () => { const t = btn.textContent; btn.textContent = 'Copied'; setTimeout(()=>{ btn.textContent = t; }, 1500); };
+    try{ navigator.clipboard.writeText(text).then(done, ()=>{ toast('Copy blocked — select the text manually', null, null, 'border-amber-500/40 bg-amber-500/10 text-amber-300'); }); }
+    catch{ toast('Copy blocked — select the text manually', null, null, 'border-amber-500/40 bg-amber-500/10 text-amber-300'); }
   }
   load();
   if(window.refreshIcons) refreshIcons(document.body);

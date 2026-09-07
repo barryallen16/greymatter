@@ -181,12 +181,13 @@
     if (pushHash) location.hash = encodeURIComponent(doc.file);
     activeFile = doc.file;
     setActive(doc.file);
-    crumb.textContent = doc.label + ' — ' + doc.file;
     closeSidebar();
 
-    if (cache[doc.file]) return render(cache[doc.file]);
+    if (cache[doc.file]) { crumb.textContent = doc.label + ' — ' + doc.file; return render(cache[doc.file]); }
 
     status(true);
+    crumb.textContent = doc.label + ' — loading…';
+    content.style.opacity = '0.5';
     try {
       const res = await fetch('../' + doc.file);
       if (!res.ok) throw new Error(res.status);
@@ -194,17 +195,39 @@
       cache[doc.file] = md;
       errorCard.classList.add('hidden');
       render(md);
+      crumb.textContent = doc.label + ' — ' + doc.file;
     } catch (e) {
       content.innerHTML = '';
-      errorCard.classList.remove('hidden');
-      if (window.refreshIcons) refreshIcons(errorCard);
+      showError(doc, e);
     } finally {
       status(false);
+      content.style.opacity = '';
     }
     document.getElementById('scrollArea').scrollTop = 0;
   }
 
+  function showError(doc, e) {
+    const onFile = location.protocol === 'file:';
+    errorCard.innerHTML = onFile
+      ? `<div class="flex justify-center mb-4"><i data-lucide="lock" class="w-10 h-10 text-amber-400"></i></div>
+         <h2 class="text-lg font-bold text-amber-300 mb-2">Can't load the markdown files</h2>
+         <p class="text-sm text-zinc-400 mb-5">Browsers block <code>fetch()</code> on <code>file://</code> URLs. Serve this folder over HTTP:</p>
+         <div class="bg-zinc-900 rounded-lg p-4 font-mono text-sm text-emerald-300 text-left mb-3">python -m http.server 8000</div>
+         <p class="text-xs text-zinc-500">Then open <span class="text-zinc-300">http://localhost:8000/index.html</span></p>`
+      : `<div class="flex justify-center mb-4"><i data-lucide="alert-triangle" class="w-10 h-10 text-amber-400"></i></div>
+         <h2 class="text-lg font-bold text-amber-300 mb-2">Couldn't load ${doc.label}</h2>
+         <p class="text-sm text-zinc-400 mb-5">The server returned an error${e && e.message ? ` (${escapeHtml(e.message)})` : ''}. The file may be missing or the VPS is down.</p>
+         <button onclick="location.reload()" class="px-5 py-3 rounded-xl bg-white text-black text-sm font-semibold min-h-[44px]">Retry</button>`;
+    errorCard.classList.remove('hidden');
+    if (window.refreshIcons) refreshIcons(errorCard);
+  }
+
+  function escapeHtml(s){
+    return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
   function render(md) {
+    if (!window.marked) { content.textContent = md; return; }  // CDN failed — degrade to plain text, never blank
     content.innerHTML = marked.parse(md);
     // auto-TOC (Miller: chunk long docs) — no deps, headings only
     const hs = [...content.querySelectorAll('h2, h3')];
