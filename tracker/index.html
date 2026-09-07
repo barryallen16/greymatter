@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tracker — Grey Matter</title>
-<meta name="description" content="Job application tracker: Saved → Applied → OA → Interview → Offer → Rejected. Saved in your browser.">
+<meta name="description" content="Job application tracker: Saved → Applied → OA → Interview → Offer → Rejected. Synced to your server.">
 <link rel="stylesheet" href="../static/css/tailwind.css">
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../static/css/fonts.css">
@@ -13,6 +13,7 @@
 <link rel="icon" href="../favicon/favicon-16x16.png" sizes="16x16" type="image/png" />
 <link rel="apple-touch-icon" href="../favicon/apple-touch-icon.png" />
 <script src="../static/js/pixel-icons.js"></script>
+<script src="../static/js/storage.js"></script>
 <style>
   *{font-family:"Geist",system-ui,sans-serif}
   .mono{font-family:"Geist Mono",monospace}
@@ -35,7 +36,7 @@
   <div class="flex items-end gap-3">
     <div class="flex-1 min-w-0">
       <h1 class="pixel text-2xl font-bold">Tracker</h1>
-      <p class="text-sm text-zinc-500 mono mt-1"><span id="countLabel">0</span> applications · saved in this browser · export .md as backup</p>
+      <p class="text-sm text-zinc-500 mono mt-1"><span id="countLabel">0</span> applications · synced to server · export .md as backup</p>
     </div>
     <button onclick="exportMD()" class="shrink-0 text-xs px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[44px]">Export .md</button>
   </div>
@@ -94,8 +95,8 @@ let apps = [];
 let filter = 'all';
 const qs = s => document.querySelector(s);
 
-function load(){ try{ apps = JSON.parse(localStorage.getItem(KEY) || '[]'); }catch{ apps = []; } }
-function save(){ localStorage.setItem(KEY, JSON.stringify(apps)); }
+async function load(){ apps = await storeGet(KEY) || []; }
+async function save(){ await storeSet(KEY, apps); }
 function esc(s){ return (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function stageLabel(id){ const f = STAGES.find(x=>x.id===id); return f ? f.label : id; }
 function stageCls(id){ const f = STAGES.find(x=>x.id===id); return (f && f.cls) || STAGES[1].cls; }
@@ -163,7 +164,7 @@ window.exportMD = () => {
 
 { const d = new Date(Date.now() + 7*864e5), p = n => String(n).padStart(2,'0');
   qs('#fFollowup').value = `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; }
-load(); renderStages(); renderList();
+load().then(()=>{ renderStages(); renderList(); });
 if(window.refreshIcons) refreshIcons(document.body);
 </script>
 </body>

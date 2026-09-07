@@ -1,3 +1,9 @@
+#agents
+.agents/
+.claude/
+graphify-out/
+skills-lock.json
+
 # Large raw data — kept for Pages (archive needs 4.8M, token redacted) — needed at greymatter.isroot.in/archive
 youtube_urls.csv
 youtube_urls.txt
@@ -20,6 +26,9 @@ __.pycache__
 
 # Docker / build tmp
 *.log
+
+# SQLite storage (user data lives on the VPS volume, not git)
+api/data/
 
 # Node / Tailwind build artifacts (keep tailwind.css, ignore source map and modules)
 node_modules/

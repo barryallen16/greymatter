@@ -175,23 +175,21 @@
   </div>
 </main>
 
+<script src="../static/js/storage.js"></script>
 <script>
   const KEY='roadmap-2026-09-02';
   const checks=document.querySelectorAll('.tick:not([disabled])');
   document.getElementById('totalCount').textContent=checks.length;
   document.getElementById('dateStr').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'});
-  function load(){
-    try{
-      const s=JSON.parse(localStorage.getItem(KEY)||'{}');
-      checks.forEach(c=>{ if(s[c.dataset.id]) c.checked=true; });
-    }catch{}
+  async function load(){
+    const s=await storeGet(KEY) || {};
+    checks.forEach(c=>{ if(s[c.dataset.id]) c.checked=true; });
     update();
   }
-  function save(){
+  async function save(){
     const s={};
     checks.forEach(c=>{ s[c.dataset.id]=c.checked; });
-    try{ localStorage.setItem(KEY, JSON.stringify(s)); }
-    catch{ warnStore(); }
+    if(!await storeSet(KEY, s)) warnStore();
   }
   function warnStore(){
     let d=document.getElementById('storeWarn');
@@ -208,7 +206,7 @@
     document.getElementById('progressBar').style.width=(done/checks.length*100)+'%';
   }
   checks.forEach(c=>c.addEventListener('change',()=>{save();update();}));
-  function resetDay(){ if(confirm('Reset today?')){localStorage.removeItem(KEY); checks.forEach(c=>c.checked=false); update();}}
+  async function resetDay(){ if(confirm('Reset today?')){await storeDel(KEY); checks.forEach(c=>c.checked=false); update();}}
   function exportMD(){
     let md='# 2026-09-02 Roadmap\n\nProgress '+document.getElementById('doneCount').textContent+'/'+document.getElementById('totalCount').textContent+'\n\n';
     checks.forEach(c=>{
@@ -240,7 +238,6 @@
     };
     r.readAsText(file);
   }
-  try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); }catch{ warnStore(); }
   load();
   if(window.refreshIcons) refreshIcons(document.body);
 </script>
