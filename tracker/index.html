@@ -188,7 +188,7 @@ function renderList(){
           ${STAGES.slice(1).map(s=>`<option value="${s.id}"${a.status===s.id ? ' selected' : ''}>${s.label}</option>`).join('')}
         </select>
         ${a.link ? `<a href="${esc(a.link)}" target="_blank" rel="noopener noreferrer" class="shrink-0 px-4 py-2 rounded-xl bg-white text-black text-xs font-semibold hover:bg-zinc-200 flex items-center min-h-[44px]">Open</a>` : ''}
-        ${(a.files||[]).map(f=>`<button onclick="viewFile('${esc(f)}')" class="shrink-0 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-300 hover:border-zinc-600 text-xs mono min-h-[44px]">View ${/\.docx$/i.test(f)?'DOCX':'PDF'}</button><a href="${fileUrl(f)}?download=1" download="${esc(f)}" class="shrink-0 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs mono min-h-[44px] flex items-center">Download</a>`).join('')}
+        ${(a.files||[]).map(f=>`<button onclick="viewFile('${esc(f)}')" title="View ${esc(f)} (download inside)" class="shrink-0 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-300 hover:border-zinc-600 text-xs mono min-h-[44px]">${/\.docx$/i.test(f)?'DOCX':'PDF'}</button>`).join('')}
         <button onclick="editLink('${a.id}')" aria-label="Edit job posting link" class="shrink-0 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 text-xs mono min-h-[44px]">${a.link ? 'Edit link' : 'Add link'}</button>
         <button onclick="delApp('${a.id}')" aria-label="Delete" class="shrink-0 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-500 hover:text-red-400 hover:border-red-500/40 min-h-[44px]"><i data-lucide="trash" class="w-4 h-4 pointer-events-none"></i></button>
       </div>
@@ -326,8 +326,13 @@ window.viewFile = async n => {
 };
 window.closeViewer = () => { qs('#viewer').style.display = 'none'; qs('#viewerFrame').src = ''; qs('#viewerDoc').innerHTML = ''; };
 window.delFile = async n => {
-  if(!confirm('Delete ' + n + '?')) return;
+  let old = null;  // same Undo pattern as delApp — no blocking confirm on mobile
+  try{ const r = await fetch(fileUrl(n)); if(r.ok) old = await r.blob(); }catch{}
   await fetch(fileUrl(n), {method:'DELETE'}); loadFiles();
+  toast(`Deleted ${esc(n)}`, 'Undo', async ()=>{
+    if(old) await fetch(fileUrl(n), {method:'PUT', body:old});
+    loadFiles();
+  });
 };
 if(window.refreshIcons) refreshIcons(document.body);
 </script>
