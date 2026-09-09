@@ -67,6 +67,31 @@
     <button type="submit" class="w-full py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-zinc-200 min-h-[44px]">Add application</button>
   </form>
 
+  <div class="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+    <div class="flex items-center gap-2">
+      <div class="flex-1 min-w-0">
+        <h2 class="font-semibold text-sm">Files</h2>
+        <p class="mono text-[11px] text-zinc-500 mt-0.5">PDF + DOCX · stored on your server</p>
+      </div>
+      <label class="shrink-0 cursor-pointer text-xs px-4 py-3 rounded-xl bg-white text-black font-semibold hover:bg-zinc-200 min-h-[44px] flex items-center">
+        Upload
+        <input id="fUpload" type="file" accept=".pdf,.docx" multiple class="hidden" onchange="uploadFiles(this)">
+      </label>
+    </div>
+    <div id="fileList" class="mt-3 space-y-2"></div>
+  </div>
+
+  <div id="viewer" style="display:none" class="fixed inset-0 z-50 bg-black/80 p-4" onclick="if(event.target===this)closeViewer()">
+    <div class="max-w-3xl mx-auto h-full flex flex-col gap-2">
+      <div class="flex items-center gap-2">
+        <span id="viewerName" class="mono text-xs text-zinc-300 truncate flex-1"></span>
+        <a id="viewerDl" href="#" download class="text-xs px-4 py-2 rounded-xl bg-white text-black font-semibold">Download</a>
+        <button onclick="closeViewer()" class="text-xs px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-700">Close</button>
+      </div>
+      <iframe id="viewerFrame" class="flex-1 w-full rounded-xl bg-white" title="File preview"></iframe>
+    </div>
+  </div>
+
   <div id="list" class="mt-4 space-y-3"></div>
 
   <div id="empty" class="text-center py-14 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/30">
@@ -157,6 +182,7 @@ function renderList(){
           ${STAGES.slice(1).map(s=>`<option value="${s.id}"${a.status===s.id ? ' selected' : ''}>${s.label}</option>`).join('')}
         </select>
         ${a.link ? `<a href="${esc(a.link)}" target="_blank" rel="noopener noreferrer" class="shrink-0 px-4 py-2 rounded-xl bg-white text-black text-xs font-semibold hover:bg-zinc-200 flex items-center min-h-[44px]">Open</a>` : ''}
+        ${(a.files||[]).map(f=>`<button onclick="viewFile('${esc(f)}')" class="shrink-0 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-300 hover:border-zinc-600 text-xs mono min-h-[44px]">View ${/\.docx$/i.test(f)?'DOCX':'PDF'}</button>`).join('')}
         <button onclick="editLink('${a.id}')" aria-label="Edit job posting link" class="shrink-0 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 text-xs mono min-h-[44px]">${a.link ? 'Edit link' : 'Add link'}</button>
         <button onclick="delApp('${a.id}')" aria-label="Delete" class="shrink-0 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-500 hover:text-red-400 hover:border-red-500/40 min-h-[44px]"><i data-lucide="trash" class="w-4 h-4 pointer-events-none"></i></button>
       </div>
@@ -241,6 +267,49 @@ function prefillFollowup(){
 }
 prefillFollowup();
 load().then(()=>{ renderStages(); renderList(); });
+loadFiles();
+if(window.refreshIcons) refreshIcons(document.body);
+
+// Files — PDF/DOCX on the server (api/data/files, same volume as SQLite)
+const fileUrl = n => '/api/files/' + encodeURIComponent(n);
+async function loadFiles(){
+  const el = qs('#fileList');
+  try{
+    const r = await fetch('/api/files');
+    if(!r.ok) throw 0;
+    const files = await r.json();
+    el.innerHTML = files.length ? files.map(f=>`
+      <div class="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2">
+        <span class="text-xs truncate flex-1" title="${esc(f.name)}">${esc(f.name)} <span class="mono text-[11px] text-zinc-500">${(f.size/1024).toFixed(0)} KB</span></span>
+        <button onclick="viewFile('${esc(f.name)}')" class="text-xs px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 min-h-[44px]">View</button>
+        <a href="${fileUrl(f.name)}?download=1" download="${esc(f.name)}" class="text-xs px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 min-h-[44px] flex items-center">Download</a>
+        <button onclick="delFile('${esc(f.name)}')" aria-label="Delete file" class="text-xs px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-500 hover:text-red-400 min-h-[44px]">✕</button>
+      </div>`).join('')
+      : '<p class="mono text-[11px] text-zinc-600">No files yet — upload your resume (PDF/DOCX, max 10MB).</p>';
+  }catch{ el.innerHTML = '<p class="mono text-[11px] text-zinc-600">Files need the server (offline right now).</p>'; }
+}
+window.uploadFiles = async input => {
+  for(const f of input.files){
+    if(!/\.(pdf|docx)$/i.test(f.name)){ toast(f.name + ' — only PDF/DOCX'); continue; }
+    if(f.size > 10*1024*1024){ toast(f.name + ' — over 10MB'); continue; }
+    const r = await fetch(fileUrl(f.name), {method:'PUT', body:f});
+    toast(r.ok ? 'Uploaded ' + f.name : 'Upload failed: ' + f.name);
+  }
+  input.value = ''; loadFiles();
+};
+window.viewFile = n => {
+  // ponytail: browsers render PDF natively, DOCX has no native renderer — download only
+  if(/\.docx$/i.test(n)){ const a = document.createElement('a'); a.href = fileUrl(n) + '?download=1'; a.download = n; a.click(); return; }
+  qs('#viewerName').textContent = n;
+  qs('#viewerDl').href = fileUrl(n) + '?download=1';
+  qs('#viewerFrame').src = fileUrl(n);
+  qs('#viewer').style.display = '';
+};
+window.closeViewer = () => { qs('#viewer').style.display = 'none'; qs('#viewerFrame').src = ''; };
+window.delFile = async n => {
+  if(!confirm('Delete ' + n + '?')) return;
+  await fetch(fileUrl(n), {method:'DELETE'}); loadFiles();
+};
 if(window.refreshIcons) refreshIcons(document.body);
 </script>
 </body>

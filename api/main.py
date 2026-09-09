@@ -13,6 +13,13 @@ from urllib.parse import unquote
 
 DB = Path(__file__).parent / "data" / "store.db"
 DB.parent.mkdir(exist_ok=True)
+FILES = Path(__file__).parent / "data" / "files"
+FILES.mkdir(parents=True, exist_ok=True)
+FILE_TYPES = {
+    ".pdf": "application/pdf",
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+}
+MAX_FILE = 10 * 1024 * 1024  # resumes are <1MB; 10MB headroom, nginx client_max_body_size must exceed this
 conn = sqlite3.connect(DB, check_same_thread=False)
 conn.execute("CREATE TABLE IF NOT EXISTS kv (k TEXT PRIMARY KEY, v TEXT NOT NULL)")
 conn.commit()
@@ -36,9 +43,46 @@ class Handler(BaseHTTPRequestHandler):
         key = unquote(self.path.removeprefix("/api/store/"))
         return key if key and "/" not in key else None
 
+    def _fname(self):
+        p = self.path.split("?", 1)[0]
+        if not p.startswith("/api/files/"):
+            return None
+        name = Path(unquote(p.removeprefix("/api/files/"))).name.strip()
+        if not name or len(name) > 120 or name.startswith("."):
+            return None
+        if any(c in name for c in "'\"<>"):  # keep names onclick-safe for the tracker UI
+            return None
+        if Path(name).suffix.lower() not in FILE_TYPES:
+            return None
+        return name
+
+    def _send_file(self, name, download=False):
+        f = FILES / name
+        if not f.is_file():
+            return self._send(404, b'{"error":"not found"}')
+        data = f.read_bytes()
+        ctype = FILE_TYPES[Path(name).suffix.lower()]
+        disp = ("attachment" if download else "inline") + f'; filename="{name}"'
+        self.send_response(200)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Disposition", disp)
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
     def do_GET(self):
         if self.path == "/health":
             return self._send(200, b'{"ok":true}')
+        if self.path.split("?", 1)[0] in ("/api/files", "/api/files/"):
+            items = sorted(
+                ({"name": p.name, "size": p.stat().st_size} for p in FILES.iterdir()
+                 if p.is_file() and p.suffix.lower() in FILE_TYPES),
+                key=lambda d: d["name"].lower(),
+            )
+            return self._send(200, json.dumps(items).encode())
+        name = self._fname()
+        if name is not None:
+            return self._send_file(name, download="download" in (self.path.split("?", 1)[1] if "?" in self.path else ""))
         key = self._key()
         if not key:
             return self._send(404, b'{"error":"not found"}')
@@ -46,6 +90,14 @@ class Handler(BaseHTTPRequestHandler):
         self._send(200, (row[0] if row else "null").encode())
 
     def do_PUT(self):
+        name = self._fname()
+        if name is not None:  # raw file bytes — no multipart lib needed
+            n = int(self.headers.get("Content-Length") or 0)
+            if n > MAX_FILE or n <= 0:
+                self.close_connection = True
+                return self._send(413 if n > MAX_FILE else 400, b'{"error":"empty or too large (max 10MB)"}')
+            (FILES / name).write_bytes(self.rfile.read(n))
+            return self._send(200)
         key = self._key()
         if not key:
             return self._send(404, b'{"error":"not found"}')
@@ -69,6 +121,13 @@ class Handler(BaseHTTPRequestHandler):
         self._send(200)
 
     def do_DELETE(self):
+        name = self._fname()
+        if name is not None:
+            try:
+                (FILES / name).unlink()
+            except FileNotFoundError:
+                pass
+            return self._send(200)
         key = self._key()
         if not key:
             return self._send(404, b'{"error":"not found"}')
