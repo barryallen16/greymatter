@@ -31,7 +31,7 @@ Base: local `http://127.0.0.1:8080` (`PORT=8080 uv run python api/main.py`), pro
 - Files (resumes live here, served alongside the instance):
   - `GET /api/files` → `[{name, size}]`
   - `PUT /api/files/<name>` with raw file bytes (no multipart) — `.pdf`/`.docx` only, ≤10MB.
-  - `GET /api/files/<name>` views inline (PDF in an iframe; DOCX rendered in-page via vendored mammoth, `static/js/mammoth.min.js`, loaded lazily); append `?download=1` to force download.
+  - `GET /api/files/<name>` views inline (PDF in an iframe; DOCX view prefers the sibling `<id>.pdf` when present, else renders in-page via vendored mammoth, `static/js/mammoth.min.js`, loaded lazily); append `?download=1` to force download.
   - `DELETE /api/files/<name>`.
   - Name rules: no leading dot, ≤120 chars, no `'"<>`, extension must be `.pdf`/`.docx` (else 404).
 

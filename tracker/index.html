@@ -313,10 +313,12 @@ window.viewFile = async n => {
   qs('#viewer').style.display = '';
   const frame = qs('#viewerFrame'), doc = qs('#viewerDoc');
   if(!/\.docx$/i.test(n)){ doc.style.display = 'none'; frame.style.display = ''; frame.src = fileUrl(n); return; }
-  // ponytail: DOCX has no native renderer — mammoth converts to HTML; images dropped, layout approximate
+  // ponytail: preview the PDF when it exists (exact formatting); mammoth fallback for docx-only files
   frame.style.display = 'none'; doc.style.display = '';
   doc.innerHTML = '<p class="text-zinc-500">Loading preview…</p>';
   try{
+    const pdf = fileUrl(n.replace(/\.docx$/i, '.pdf'));
+    if((await fetch(pdf)).ok){ doc.style.display = 'none'; frame.style.display = ''; frame.src = pdf; return; }
     await loadMammoth();
     const buf = await (await fetch(fileUrl(n))).arrayBuffer();
     doc.innerHTML = (await mammoth.convertToHtml({arrayBuffer: buf})).value || '<p class="text-zinc-500">Empty document.</p>';
