@@ -189,7 +189,7 @@
     crumb.textContent = doc.label + ' — loading…';
     content.style.opacity = '0.5';
     try {
-      const res = await fetch('../' + doc.file);
+      const res = await fetch(doc.file);
       if (!res.ok) throw new Error(res.status);
       const md = await res.text();
       cache[doc.file] = md;
