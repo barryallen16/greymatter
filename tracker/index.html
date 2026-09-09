@@ -89,6 +89,7 @@
         <button onclick="closeViewer()" class="text-xs px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-700">Close</button>
       </div>
       <iframe id="viewerFrame" class="flex-1 w-full rounded-xl bg-white" title="File preview"></iframe>
+      <div id="viewerDoc" style="display:none" class="flex-1 w-full rounded-xl bg-white text-zinc-900 text-sm leading-relaxed p-6 overflow-auto"></div>
     </div>
   </div>
 
@@ -136,7 +137,12 @@ async function save(){
 function esc(s){ return (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function stageLabel(id){ const f = STAGES.find(x=>x.id===id); return f ? f.label : id; }
 function stageCls(id){ const f = STAGES.find(x=>x.id===id); return (f && f.cls) || STAGES[1].cls; }
-function fmtDate(ts){ try{ return new Date(ts).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}); }catch{ return ''; } }
+function fmtDate(ts){ try{
+  const t = new Date(ts), abs = t.toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+  const n = Math.floor((new Date().setHours(0,0,0,0) - new Date(t).setHours(0,0,0,0)) / 864e5);
+  const rel = n<=0 ? 'today' : n===1 ? 'yesterday' : n<7 ? n+'d ago' : n<30 ? Math.floor(n/7)+'w ago' : n<365 ? Math.floor(n/30)+'mo ago' : Math.floor(n/365)+'y ago';
+  return `<span title="${abs}">${rel}</span>`;
+}catch{ return ''; } }
 
 function counts(){ const c = {all: apps.length}; STAGES.slice(1).forEach(s=> c[s.id] = apps.filter(a=>a.status===s.id).length); return c; }
 
@@ -297,15 +303,26 @@ window.uploadFiles = async input => {
   }
   input.value = ''; loadFiles();
 };
-window.viewFile = n => {
-  // ponytail: browsers render PDF natively, DOCX has no native renderer — download only
-  if(/\.docx$/i.test(n)){ const a = document.createElement('a'); a.href = fileUrl(n) + '?download=1'; a.download = n; a.click(); return; }
+function loadMammoth(){  // lazy: 600KB lib loads only on first DOCX view, tracker stays light
+  return window.mammoth ? Promise.resolve()
+    : new Promise((ok, bad) => { const s = document.createElement('script'); s.src = '../static/js/mammoth.min.js'; s.onload = ok; s.onerror = bad; document.head.appendChild(s); });
+}
+window.viewFile = async n => {
   qs('#viewerName').textContent = n;
   qs('#viewerDl').href = fileUrl(n) + '?download=1';
-  qs('#viewerFrame').src = fileUrl(n);
   qs('#viewer').style.display = '';
+  const frame = qs('#viewerFrame'), doc = qs('#viewerDoc');
+  if(!/\.docx$/i.test(n)){ doc.style.display = 'none'; frame.style.display = ''; frame.src = fileUrl(n); return; }
+  // ponytail: DOCX has no native renderer — mammoth converts to HTML; images dropped, layout approximate
+  frame.style.display = 'none'; doc.style.display = '';
+  doc.innerHTML = '<p class="text-zinc-500">Loading preview…</p>';
+  try{
+    await loadMammoth();
+    const buf = await (await fetch(fileUrl(n))).arrayBuffer();
+    doc.innerHTML = (await mammoth.convertToHtml({arrayBuffer: buf})).value || '<p class="text-zinc-500">Empty document.</p>';
+  }catch{ doc.innerHTML = '<p class="text-zinc-500">Preview failed — use Download.</p>'; }
 };
-window.closeViewer = () => { qs('#viewer').style.display = 'none'; qs('#viewerFrame').src = ''; };
+window.closeViewer = () => { qs('#viewer').style.display = 'none'; qs('#viewerFrame').src = ''; qs('#viewerDoc').innerHTML = ''; };
 window.delFile = async n => {
   if(!confirm('Delete ' + n + '?')) return;
   await fetch(fileUrl(n), {method:'DELETE'}); loadFiles();
