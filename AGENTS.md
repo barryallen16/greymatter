@@ -14,7 +14,7 @@ Static site + tiny stdlib Python API + resume skill. Read this before doing anyt
 ## Iron rules
 
 - Relative asset paths from subdirs (`../static/...`); absolute `/static/*` 404s on Pages.
-- No `cdn.tailwindcss.com` (edit HTML → `npm run build:css` → delete `node_modules/` + lockfile). No emoji — pixel icons via `<i data-lucide="name">` (valid keys in `static/js/pixel-icons.js`) + `refreshIcons()` after dynamic DOM.
+- No `cdn.tailwindcss.com` (edit HTML → `npm run build:css` → delete `node_modules/` + lockfile). If you add HTML in a new dir, add it to `tailwind.config.js` `content` first or its classes silently won't exist. No emoji — pixel icons via `<i data-lucide="name">` (valid keys in `static/js/pixel-icons.js`) + `refreshIcons()` after dynamic DOM.
 - `fetch()` needs HTTP — test with `uv run python -m http.server`, never `file://`.
 - No secrets in git. Keep the dir lean (no `node_modules/`, `*.zip`, `*.log`, nested `.git/`).
 
