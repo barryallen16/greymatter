@@ -51,7 +51,7 @@ grep -r "cdn.tailwindcss.com" --include="*.html" . | wc -l          # 0
 grep -r "cdn.jsdelivr.net.*geist.*woff" --include="*.html" . | wc -l # 0
 grep -r 'data-lucide="pixel"' --include="*.html" . | wc -l          # 0
 python -m http.server 8770  # then:
-for p in "/" "/archive/" "/roadmaps/" "/roadmaps/2026-09-02.html" "/static/css/tailwind.css" "/static/css/fonts.css" "/static/js/pixel-icons.js" "/favicon/favicon.ico" "/daily-plan.md" "/archive/results.enriched.jsonl"; do echo -n "$p -> "; curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8770$p; done  # all 200
+for p in "/" "/archive/" "/roadmaps/" "/roadmaps/2026-09-02.html" "/static/css/tailwind.css" "/static/css/fonts.css" "/static/js/pixel-icons.js" "/favicon/favicon.ico" "/docs/daily-plan.md" "/archive/results.enriched.jsonl"; do echo -n "$p -> "; curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8770$p; done  # all 200
 ```
 
 `git add -A && git commit -m "<scope>: <what>" && git push origin main` (Pages: 1–2 min).
