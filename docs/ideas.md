@@ -76,9 +76,6 @@ ideas.md
 - import booking history from bookmyshow, district etc, also can put in qr codes.
 - but to avoid cheating in this, the qr code data is scanned to see the number of seats booked, and only those no of members can use those qr in the app. after every person has done it, the qr should be invalidate or exhausted as we check it using a db.
 
-### tamil text to speech model
-- a light weight tts model both in male and female voice for natural tamil tts. 
-
 ### Offtxt
 - a react native application , that uses sms to send data, that would otherwise be sent using internet. 
 - in india, along with the mobile data person. there is a 100 sms per day included in every ISP's unlimited plan

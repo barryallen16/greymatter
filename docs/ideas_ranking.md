@@ -38,12 +38,16 @@
 
 ### Tier A — Strong if executed, needs hardening
 
+| # | Idea | Uniqueness | Usefulness | Why / brutal truth | Verdict |
+|---|---|---|---|---|---|
 | 4 | **Tamil TTS (lightweight male/female)** `ideas.md:79` | ★★★★★ High: almost no lightweight Tamil TTS, underrepresented | ★★★☆☆ Medium: niche but aligns with `tamil-tokenizer` edge | Needs audio ML (Indic Parler-TTS). If you wrap `ai4bharat/indic-parler` + fine-tune on Tamil, it's defensible infra. Harder than RAG — 30 days is tight. | **Do only if you pick Tamil edge.** |
 | 5 | **OCR for exam paper + evaluation pipeline** `ideas.md:66` | ★★★☆☆ Medium: many OCRs, but exam formatting preservation + auto-evaluation vote is niche | ★★★★☆ High: teachers can't read handwriting — real pain | Needs PaddleOCR + layout (preserve tables/diagrams) + LLM grader with teacher approve gate. Good CV + LLM combo. Risk: handwriting variance. | **Good backup, needs dataset.** |
 | 6 | **ticket iruka? (Strava for theatres)** `ideas.md:72` | ★★★★★ High: nothing like this | ★★★☆☆ Medium: cinephiles only | **Best product thinking.** BMS import + QR exhaustion DB (only n seats can claim) solves cheating. No AI needed — pure backend (auth, DB, Redis). Shows `fresher-must-have-skills-2026` LLD + caching. Low AI, high craft. | **If you want non-AI backend showcase, do this.** |
 
 ### Tier B — Fun wrapper, hard to defend
 
+| # | Idea | Uniqueness | Usefulness | Why / brutal truth | Verdict |
+|---|---|---|---|---|---|
 | 7 | **AI image/audio/video detector + extension** `ideas.md:3` | ★☆☆☆☆ Low: Hive, Deepfake Detector, Trulith, Verigin already in Chrome Store, right-click 1.4MB, free forever | ★★★★☆ High demand but saturated | **Don't.** Interviewer: “Why not call Hive API?” You'll say “I trained a model” with no evaluation vs SoTA. Only defensible if on-device Tamil deepfake or C2PA provenance, not generic detector. | **Skip for job.** |
 | 8 | **Didn't name — free-tier “without credit card” search** `ideas.md:14` | ★★☆☆☆ Low: AlternativeTo, free-for-dev, saasworthy exist | ★★☆☆☆ Medium dev pain, small market | Curation, not engineering. CRUD + scraping, no RAG depth. | **Toy, not lead.** |
 | 9 | **synthetic clone (WhatsApp chat)** `ideas.md:40` | ★★☆☆☆ Low: many WhatsApp-clone finetune repos | ★★☆☆☆ Low-medium | Ethics gray even with PII scrub — looks like stalking. Not lead portfolio. | **Side demo only.** |
@@ -51,6 +55,8 @@
 
 ### Tier C — Demo only, don't lead resume
 
+| # | Idea | Uniqueness | Usefulness | Why / brutal truth | Verdict |
+|---|---|---|---|---|---|
 | 11 | **wo--men (male/female frame filter)** `ideas.md:25` | ★★☆☆☆ Tutorials everywhere (OpenCV gender) | ★☆☆☆☆ None — novelty | Ethics/bias minefield, no usefulness. | **No.** |
 | 12 | **Athu ethu yethu (Tamil game LLM realtime)** `ideas.md:35` | ★★★☆☆ Medium fun | ★☆☆☆☆ Game logic trivial | Needs realtime STT-LLM-TTS low latency — hard, low interview ROI (just loop). | **No.** |
 | 13 | **Offtxt (SMS data)** `ideas.md:82` — already `off-txt` 3.5/10 broken `repo-analysis.md:23` | ★★★☆☆ Unique idea, but you tried and core flow sends to hardcoded number | ★★☆☆☆ Feasibility low: 48kb image = 300 SMS (100/day limit), grayscale 10% looks bad, QR rebuild brittle | Interviewers poke holes: cost, latency, 100 SMS waste claim weak (most have WiFi). | **Don't double down.** |
@@ -58,6 +64,8 @@
 
 ### Tier F — Avoid (ethics / ToS / too heavy)
 
+| # | Idea | Uniqueness | Usefulness | Why / brutal truth | Verdict |
+|---|---|---|---|---|---|
 | 15 | **instagram story patch (merge tagged stories via ReVanced)** `ideas.md:52` | ★★★☆☆ Unique | ★★☆☆☆ Frustration real | Violates Instagram ToS, needs reverse engineering, patch distribution = ban risk. `platform to generate patches` = liability. | **No — unsafe.** |
 | 16 | **AI person finder in CCTV** `ideas.md:97` | ★★☆☆☆ Exists (face search) | ★★☆☆☆ Surveillance | Privacy, heavy video infra, needs face recognition at scale — not fresher solo. | **No.** |
 | 17 | **healthprix halo (ASR for doctors, The Pitt)** `ideas.md:100` | ★★☆☆☆ Many medical ASR | ★★☆☆☆ High liability | Medical accuracy, needs fine-tune, HIPAA-like. | **No.** |
@@ -72,7 +80,7 @@ You have 19 ideas, 3 are gold, 3 are okay, 13 are job-market suicide. You don't 
 
 * `Postgres` not SQLite + `Redis` cache + `JWT` auth (`roadmap.sh/backend` missing)
 * 15 tests (`tamil-tokenizer` pattern 23 tests) + `Dockerfile` + `GH Actions` + live URL `fresher-must-have-skills-2026 10-point checklist`
-* `heap` done (Kth Largest, Top K) + `site:lever.co` 3 apps/day classified A/B/C/D
+* `heap` done (Kth Largest, Top K) + `site:lever.co` 3 apps/day (type A/B/C/D set at OA/interview, not before)
 
 Pick **#1 Gov scheme** if you want RAG backend (my reco — Tamil voice = moat), or **#2 Fresherr** if you want fastest win (labour codes fresh, no one patched templates yet). Don't do detector (#7) — you'll be 5th clone on Chrome Store.
 

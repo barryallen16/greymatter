@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026-09-11 — Trees Day 1 (algomap restart) — Grey Matter</title>
+<link rel="stylesheet" href="../static/css/tailwind.css">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/css/fonts.css">
+<link rel="icon" href="../favicon/favicon.ico" type="image/x-icon" />
+<link rel="icon" href="../favicon/favicon-32x32.png" sizes="32x32" type="image/png" />
+<link rel="icon" href="../favicon/favicon-16x16.png" sizes="16x16" type="image/png" />
+<link rel="apple-touch-icon" href="../favicon/apple-touch-icon.png" />
+<script src="../static/js/pixel-icons.js"></script>
+<style>
+  *{font-family:"Geist",system-ui,sans-serif}
+  .mono{font-family:"Geist Mono",monospace}
+  .pixel{font-family:"GeistPixel","Geist",sans-serif; letter-spacing:-0.02em}
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-thumb{background:#27272a;border-radius:8px}
+  .tick{width:20px;height:20px;min-width:20px; accent-color:#10b981; touch-action:manipulation}
+  @media (pointer:coarse){.tick{width:26px;height:26px;min-width:26px}}
+  .tick:checked+span{text-decoration:line-through;opacity:0.55}
+  .progress{transition:width .3s ease}
+  html{ -webkit-text-size-adjust: 100%; }
+  label{ touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  label:has(.tick){ padding: 6px 0; margin: -6px 0; }
+  @media (prefers-reduced-motion: reduce){.progress{transition:none}}
+  @supports(padding: max(0px)){ header{ padding-top: max(0.5rem, env(safe-area-inset-top)); } }
+</style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 antialiased">
+<header class="sticky top-0 z-30 bg-zinc-950/90 backdrop-blur border-b border-zinc-800" style="padding-top: env(safe-area-inset-top);">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between gap-3 sm:gap-4">
+    <div class="min-w-0 flex-1">
+      <h1 class="text-base sm:text-lg font-bold truncate">2026-09-11 <span class="text-zinc-500 font-normal">· Trees Day 1 (algomap restart)</span></h1>
+      <p class="text-[11px] sm:text-xs text-zinc-500 mono truncate">Sep 4 died too · restart, don't repay · <span id="dateStr"></span> · <span id="saveState"></span></p>
+    </div>
+    <div class="text-right shrink-0">
+      <div class="text-sm font-semibold"><span id="doneCount">0</span>/<span id="totalCount">0</span></div>
+      <div class="w-24 sm:w-32 h-1.5 bg-zinc-800 rounded-full mt-1 overflow-hidden"><div id="progressBar" class="h-full bg-emerald-500 progress" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 pb-3 flex gap-2 overflow-x-auto scrollbar-none">
+    <button onclick="resetDay()" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px]">Reset</button>
+    <button onclick="exportMD()" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px]">Export .md</button>
+    <button onclick="document.getElementById('importFile').click()" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px]">Import .md</button>
+    <input type="file" id="importFile" accept=".md,text/markdown" class="hidden">
+    <a href="./index.html" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px] flex items-center">All roadmaps</a>
+    <a href="./2026-09-04.html" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px] flex items-center">← Sep 04</a>
+    <a href="../docs/" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-emerald-500 text-black font-semibold hover:bg-emerald-400 min-h-[40px] flex items-center">Docs</a>
+    <a href="../tracker/" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px] flex items-center">Tracker</a>
+  </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-5">
+  <div id="doneBanner" class="hidden rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-4 text-center text-sm"><span class="font-bold text-emerald-300">Day complete.</span> <span class="text-zinc-300">Export .md as backup — streak &gt; perfection.</span></div>
+
+  <section class="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
+    <h2 class="font-bold text-emerald-400 text-sm flex items-center gap-2"><i data-lucide="rocket" class="w-4 h-4"></i> Today's Edge</h2>
+    <p class="text-sm mt-1">The old restarts jumped to heaps — a brand-new structure on day one of a broken streak — and produced zero, twice. Today starts where algomap actually has you: <strong>Trees, Day 1 — traversals</strong>. Videos below are from YOUR OWN subscription index (yt-ssf), not random YouTube. One thing counts today: <strong>recursive inorder/preorder/postorder written from memory.</strong></p>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="space-y-3">
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-zinc-800 px-2 py-0.5 rounded">07:00</span> Wake — no phone <span class="ml-auto text-zinc-500">40m</span></div>
+      <label class="flex gap-3 mt-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="wake"><span class="text-sm">Water, 20m walk/run + shower. Phone stayed outside the bedroom.</span></label>
+    </div>
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-emerald-500 text-black px-2 py-0.5 rounded">08:10–09:40</span> DSA 1 — Learn: the 3 DFS traversals <span class="ml-auto text-emerald-400">90m</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="dsa_video"><span class="text-sm"><strong>Watch (25m):</strong> <a href="https://youtube.com/watch?v=gm8DUJJhmY4" target="_blank" class="text-emerald-400 underline">mycodeschool — Binary tree traversal: Preorder, Inorder, Postorder</a> (in your yt-ssf feed). Pause at each order and predict the next node.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="dsa_video2"><span class="text-sm"><strong>Watch (20m):</strong> <a href="https://youtube.com/watch?v=9RHO6jU--GU" target="_blank" class="text-emerald-400 underline">mycodeschool — breadth-first vs depth-first</a> (yt-ssf) — why DFS uses a stack (call stack), BFS a queue.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="dsa_leet94"><span class="text-sm"><strong>Solve:</strong> <a href="https://leetcode.com/problems/binary-tree-inorder-traversal/" target="_blank" class="text-emerald-400 underline">94. Inorder</a> recursive — then <a href="https://leetcode.com/problems/binary-tree-preorder-traversal/" target="_blank" class="text-emerald-400 underline">144. Preorder</a>. 25m cap each, editorial allowed once.</span></label>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-emerald-500 text-black px-2 py-0.5 rounded">09:55–11:25</span> DSA 2 — Redo + one from memory <span class="ml-auto text-emerald-400">90m</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="dsa_redo"><span class="text-sm"><strong>Redo all three orders from scratch</strong> — blank editor, no video, logic spoken aloud. Extra credit: <a href="https://leetcode.com/problems/binary-tree-postorder-traversal/" target="_blank" class="text-emerald-400 underline">145. Postorder</a>.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="dsa_read"><span class="text-sm"><strong>Read (10m):</strong> <a href="https://aman.ai/code/data-structures/#binary-tree" target="_blank" class="text-emerald-400 underline">aman.ai — Binary Tree</a> (via your aman-ai index) — complexity table: every traversal is O(n) time, O(h) space.</span></label>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-blue-500 text-white px-2 py-0.5 rounded">11:35–13:05</span> Project 1 — security cleanup <span class="ml-auto text-blue-300">90m</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="sec_revoke"><span class="text-sm"><strong>Revoke the leaked tokens:</strong> Telegram bot token + 2 OpenRouter keys. Regenerate what you still need, nothing else.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="sec_git"><span class="text-sm"><strong>Purge</strong> <code class="mono text-xs bg-zinc-800 px-1 rounded">.env</code> history from kaggle-automation (<code class="mono text-xs bg-zinc-800 px-1 rounded">git filter-repo</code> or fresh-init with clean history).</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="sec_delete"><span class="text-sm"><strong>Delete junk repos:</strong> Vadachennai, project01, salim, TensorTonic-Solutions. Recruiters click through.</span></label>
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-zinc-800 bg-zinc-900/30 p-3 text-xs text-zinc-500 mono text-center">13:05–14:00 Lunch — actually rest, no screen</div>
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-blue-500 text-white px-2 py-0.5 rounded">14:00–15:30</span> Project 2 — Dockerfile that passes <span class="ml-auto text-blue-300">90m</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="proj_docker"><span class="text-sm"><strong>Dockerize kaggle-automation:</strong> Dockerfile + compose. Gate: <code class="mono text-xs bg-zinc-800 px-1 rounded">docker build .</code> exits 0. Stuck? <a href="../archive/?q=docker" target="_blank" class="text-emerald-400 underline">your docker notes</a> + aman.ai Docker page.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="proj_ci"><span class="text-sm"><strong>CI:</strong> <code class="mono text-xs bg-zinc-800 px-1 rounded">.github/workflows/ci.yml</code> — pytest + lint on push. Copy the shape from your tokenizer repo.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="proj_commit"><span class="text-sm"><strong>One atomic commit + push.</strong> Today's proof.</span></label>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-amber-500 text-black px-2 py-0.5 rounded">15:45–16:30</span> Applications — 3 good <span class="ml-auto text-amber-400">45m</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="apps_find"><span class="text-sm"><strong>Find 3 fresh JDs:</strong> site:lever.co / site:greenhouse.io + Naukri, Instahyre. Chennai product cos + GCC GenAI drives included.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="apps_classify"><span class="text-sm"><strong>Type stays blank for now</strong> — classify A/B/C/D only when an app converts to an OA/interview, then prep that lane. Before that it's a guess.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="apps_tracker"><span class="text-sm"><strong>Log in the tracker</strong> — company, role, type, link, status, follow-up date.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="apps_dm"><span class="text-sm"><strong>Send 1 referral DM:</strong> 3 lines + GitHub + one quantified bullet. Referral ≈ 40 cold applies.</span></label>
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-zinc-800 bg-zinc-900/30 p-3 text-xs text-zinc-500 mono text-center">16:30–17:45 Move — run/gym 60m. Not optional.</div>
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-violet-500 text-white px-2 py-0.5 rounded">18:15–19:30</span> Fundamentals — OS from your archive <span class="ml-auto text-violet-300">75m</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="fund_os"><span class="text-sm"><strong>OS (30m):</strong> your own <a href="../archive/?q=virtual%20memory" target="_blank" class="text-emerald-400 underline">virtual memory + page table notes</a> (25 OS cards saved) — recap one topic aloud in 10 sentences.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="fund_sql"><span class="text-sm"><strong>SQL (25m):</strong> <a href="https://mystery.knightlab.com/" target="_blank" class="text-emerald-400 underline">SQL Murder Mystery</a> — 3 more steps. You already saved the <a href="../archive/?q=SQL%20Murder%20Mystery" target="_blank" class="text-emerald-400 underline">card</a>.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="fund_star"><span class="text-sm"><strong>STAR story (20m):</strong> draft one for tamil-tokenizer — task, action, 11–16× number.</span></label>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-zinc-700 text-white px-2 py-0.5 rounded">20:15–21:00</span> Review <span class="ml-auto text-zinc-400">45m</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="rev_log"><span class="text-sm"><strong>One line in the notebook:</strong> date · problems · solved-without-help? · commit? · apps sent.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="rev_flash"><span class="text-sm">5m flashcards: preorder vs inorder use-cases, why BFS = queue, O(h) space meaning.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="rev_next"><span class="text-sm"><strong>Write tomorrow's 3 tasks on paper</strong> — Trees Day 2: iterative traversals + level order.</span></label>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-zinc-700 bg-zinc-800/30 p-4 text-center">
+      <p class="text-sm font-semibold">Minimum viable day</p>
+      <p class="text-xs text-zinc-400 mt-1">2 problems + 1 app + 30m project — never zero. Streak &gt; perfection.</p>
+      <label class="flex justify-center gap-2 mt-3 cursor-pointer"><input type="checkbox" class="tick" data-id="mvp"><span class="text-sm">MVP checked</span></label>
+    </div>
+
+  </section>
+
+  <section class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+    <h3 class="font-semibold text-sm">If you only do 3 things</h3>
+    <ol class="text-sm mt-2 space-y-1 list-decimal ml-5">
+      <li>Recursive inorder + preorder + postorder, written from memory</li>
+      <li>Revoke the 3 leaked keys — 10 minutes, before anything else</li>
+      <li><code class="mono text-xs bg-zinc-800 px-1 rounded">docker build .</code> passes + one atomic push</li>
+    </ol>
+    <p class="text-xs text-zinc-500 mt-3">Full ladder (Trees first, heaps later) lives in <a href="../docs/#daily-plan.md" class="text-emerald-400 underline">docs · Daily Plan</a>. Sep 02 and Sep 04 stay as history — today is the restart.</p>
+  </section>
+
+  <div class="text-center text-xs text-zinc-600 mono py-4">
+    21:00 free — guilt free. 23:00 lights out. 8h sleep or the ladder is wasted.
+  </div>
+</main>
+
+<div id="toast" role="status" style="display:none;bottom:calc(1rem + env(safe-area-inset-bottom))" class="fixed left-1/2 -translate-x-1/2 z-50 max-w-[calc(100vw-2rem)] items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg"></div>
+
+<script src="../static/js/storage.js"></script>
+<script>
+  const KEY='roadmap-2026-09-11';
+  const checks=document.querySelectorAll('.tick:not([disabled])');
+  document.getElementById('totalCount').textContent=checks.length;
+  document.getElementById('dateStr').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'});
+  async function load(){
+    const s=await storeGet(KEY) || {};
+    checks.forEach(c=>{ if(s[c.dataset.id]) c.checked=true; });
+    update();
+  }
+  function setSaveState(state){
+    document.getElementById('saveState').textContent = state==='saving' ? 'saving…'
+      : state==='ok' ? 'saved'
+      : 'NOT saved — server unreachable';
+  }
+  async function save(){
+    setSaveState('saving');
+    setSaveState(await storeSet(KEY, await (async()=>{ const s={}; checks.forEach(c=>{ s[c.dataset.id]=c.checked; }); return s; })()) ? 'ok' : 'local');
+  }
+  function update(){
+    const done=[...checks].filter(c=>c.checked).length;
+    document.getElementById('doneCount').textContent=done;
+    document.getElementById('progressBar').style.width=(done/checks.length*100)+'%';
+    const banner=document.getElementById('doneBanner');
+    const wasDone=banner.dataset.done==='1';
+    const isDone=checks.length && done===checks.length;
+    banner.classList.toggle('hidden', !isDone);
+    if(isDone && !wasDone) toast('Day complete — '+done+'/'+checks.length+' ticks', null, null, 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300');
+    banner.dataset.done=isDone?'1':'0';
+  }
+  checks.forEach(c=>c.addEventListener('change',()=>{save();update();}));
+  function resetDay(){
+    lastState={}; checks.forEach(c=>{ lastState[c.dataset.id]=c.checked; });
+    if(!confirm('Reset all ticks for today?')) return;
+    storeDel(KEY); checks.forEach(c=>c.checked=false); update();
+    toast('Ticks cleared', 'Undo', undoReset);
+  }
+  function undoReset(){
+    storeSet(KEY, lastState); checks.forEach(c=>{ c.checked=!!lastState[c.dataset.id]; }); update();
+  }
+  let lastState={};
+
+  let toastTimer;
+  function toast(msg, actionLabel, actionFn, cls){
+    const el=document.getElementById('toast');
+    el.className=`fixed left-1/2 -translate-x-1/2 z-50 max-w-[calc(100vw-2rem)] flex items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg ${cls || 'border-zinc-700 bg-zinc-900 text-zinc-100'}`;
+    el.innerHTML=`<span class="min-w-0 truncate">${msg}</span>`+(actionLabel?`<button type="button" class="shrink-0 mono text-xs px-3 py-2 rounded-lg bg-white text-black font-semibold min-h-[44px]">${actionLabel}</button>`:'');
+    if(actionLabel) el.querySelector('button').onclick=()=>{ actionFn(); el.style.display='none'; };
+    el.style.display='flex';
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>{ el.style.display='none'; }, actionLabel?6000:3500);
+  }
+  function exportMD(){
+    let md='# 2026-09-11 Roadmap\n\nProgress '+document.getElementById('doneCount').textContent+'/'+document.getElementById('totalCount').textContent+'\n\n';
+    checks.forEach(c=>{
+      const label=c.parentElement.innerText.trim().replace(/\s+/g,' ');
+      md+='- ['+(c.checked?'x':' ')+'] '+label+'\n';
+    });
+    const blob=new Blob([md],{type:'text/markdown'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='2026-09-11.md'; a.click();
+  }
+  document.getElementById('importFile').addEventListener('change', e=>{
+    const f = e.target.files[0];
+    if(f) importMD(f);
+    e.target.value = '';
+  });
+  function importMD(file){
+    const r = new FileReader();
+    r.onload = ()=>{
+      const map = {};
+      String(r.result||'').split('\n').forEach(line=>{
+        const m = line.match(/^-\s*\[(x| )\]\s*(.+)$/i);
+        if(m) map[m[2].trim().replace(/\s+/g,' ').toLowerCase()] = m[1].toLowerCase()==='x';
+      });
+      let matched=0;
+      checks.forEach(c=>{
+        const label = c.parentElement.innerText.trim().replace(/\s+/g,' ').toLowerCase();
+        if(label in map){ c.checked = map[label]; matched++; }
+      });
+      save(); update();
+      const total = Object.keys(map).length;
+      toast(matched ? `Imported ${matched}/${total} tasks` : 'No tasks matched this file — labels must match the page', null, null, matched ? null : 'border-amber-500/40 bg-amber-500/10 text-amber-300');
+    };
+    r.readAsText(file);
+  }
+  load();
+  if(window.refreshIcons) refreshIcons(document.body);
+</script>
+</body>
+</html>
