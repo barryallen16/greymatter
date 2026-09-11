@@ -63,6 +63,7 @@
       </div>
       <p class="mono text-[11px] text-zinc-600 mt-2">Don't know the type yet? Leave it — classify after reading the JD.</p>
       <input id="fNotes" maxlength="200" placeholder="Note — e.g. referral, recruiter name…" autocomplete="off" class="mt-3 w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 placeholder-zinc-500 text-sm focus:outline-none focus:border-emerald-500/60 min-h-[44px]">
+      <textarea id="fJD" rows="3" maxlength="20000" placeholder="Job description — paste here so it's on the row at interview time (optional)" aria-label="Job description" class="mt-3 w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 placeholder-zinc-500 text-sm focus:outline-none focus:border-emerald-500/60"></textarea>
     </details>
     <button type="submit" class="w-full py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-zinc-200 min-h-[44px]">Add application</button>
   </form>
@@ -78,7 +79,7 @@
     </div>
     <details class="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3">
       <summary class="cursor-pointer text-xs mono text-zinc-400">Strategy — why this version looks like this</summary>
-      <div class="mt-2 text-xs text-zinc-400 leading-relaxed whitespace-pre-line">New-grad order (Skills, Education, Projects, Experience). Leads with 3 edges: Rust Tamil tokenizer at 11-16x, LoRA 7B beating 14B at 80.39%, pipeline over 1.18M chunks. Curated 7 projects to 3 to hold 1 page.</div>
+      <div class="mt-2 text-xs text-zinc-400 leading-relaxed whitespace-pre-line">New-grad order (Skills, Education, Projects, Experience). Leads with 4 edges: Rust Tamil tokenizer at 11-16x, LoRA 7B beating 14B at 80.39%, pipeline over 1.18M chunks, VLM distillation holding 91.6% quality at 3.14x less VRAM. Curated 7 projects to 4 to hold 1 page.</div>
     </details>
     <details class="mt-2 rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3">
       <summary class="cursor-pointer text-xs mono text-zinc-400">Gap summary — what this resume cannot fix</summary>
@@ -86,22 +87,8 @@
     </details>
     <details class="mt-2 rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3">
       <summary class="cursor-pointer text-xs mono text-zinc-400">Change log — what was rewritten and why</summary>
-      <div class="mt-2 text-xs text-zinc-400 leading-relaxed whitespace-pre-line">Prose project descriptions → 2 achievement bullets each (confirmed numbers only). 4 projects → 3: fitcheck cut when v1 spilled to 2 pages. Awards 3 → 2, skills 4 rows → 3. All metrics trace to profile.json, nothing invented.</div>
+      <div class="mt-2 text-xs text-zinc-400 leading-relaxed whitespace-pre-line">Prose descriptions → 2 achievement bullets each (confirmed numbers only). Swapped kaggle-automation for fitcheck (538K-pair distillation, 91.6% quality at 3.14x less VRAM, 297-rating human eval; kaggle evidence stays in profile). No Awards section — both publishes already appear in project bullets.</div>
     </details>
-  </div>
-
-  <div class="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-    <div class="flex items-center gap-2">
-      <div class="flex-1 min-w-0">
-        <h2 class="font-semibold text-sm">Files</h2>
-        <p class="mono text-[11px] text-zinc-500 mt-0.5">PDF + DOCX · stored on your server</p>
-      </div>
-      <label class="shrink-0 cursor-pointer text-xs px-4 py-3 rounded-xl bg-white text-black font-semibold hover:bg-zinc-200 min-h-[44px] flex items-center">
-        Upload
-        <input id="fUpload" type="file" accept=".pdf,.docx" multiple class="hidden" onchange="uploadFiles(this)">
-      </label>
-    </div>
-    <div id="fileList" class="mt-3 space-y-2"></div>
   </div>
 
   <div id="viewer" style="display:none" class="fixed inset-0 z-50 bg-black/80 p-4" onclick="if(event.target===this)closeViewer()">
@@ -202,6 +189,7 @@ function renderList(){
             ${a.type ? `<span>Type ${esc(a.type)}</span>` : ''}
             ${a.followup ? `<span class="text-amber-400/90">follow up ${esc(a.followup)}</span>` : ''}
             ${a.notes ? `<span class="w-full text-zinc-400">${esc(a.notes)}</span>` : ''}
+            ${a.jd ? `<details class="w-full mt-1"><summary class="cursor-pointer text-zinc-500">Job description</summary><div class="text-zinc-400 whitespace-pre-line">${esc(a.jd)}</div></details>` : ''}
             ${a.strategy ? `<details class="w-full mt-1"><summary class="cursor-pointer text-zinc-500">Strategy</summary><div class="text-zinc-400 whitespace-pre-line">${esc(a.strategy)}</div></details>` : ''}
             ${a.gaps ? `<details class="w-full mt-1"><summary class="cursor-pointer text-zinc-500">Gaps</summary><div class="text-zinc-400 whitespace-pre-line">${esc(a.gaps)}</div></details>` : ''}
             ${a.changelog ? `<details class="w-full mt-1"><summary class="cursor-pointer text-zinc-500">Change log</summary><div class="text-zinc-400 whitespace-pre-line">${esc(a.changelog)}</div></details>` : ''}
@@ -277,7 +265,7 @@ qs('#addForm').addEventListener('submit', e=>{
   if(dup && !confirm(`Already logged ${company} — ${role} (${stageLabel(dup.status)}). Add anyway?`)) return;
   apps.push({ id: 'a' + Date.now().toString(36) + Math.floor(Math.random()*1e4).toString(36),
     company, role, link: qs('#fLink').value.trim(), type: qs('#fType').value,
-    status: qs('#fStatus').value, followup: qs('#fFollowup').value, notes: qs('#fNotes').value.trim(), created: Date.now() });
+    status: qs('#fStatus').value, followup: qs('#fFollowup').value, notes: qs('#fNotes').value.trim(), jd: qs('#fJD').value.trim(), created: Date.now() });
   save(); e.target.reset(); prefillFollowup(); renderStages(); renderList();
   qs('#fCompany').focus();
 });
@@ -299,36 +287,11 @@ function prefillFollowup(){
 }
 prefillFollowup();
 load().then(()=>{ renderStages(); renderList(); });
-loadFiles();
 if(window.refreshIcons) refreshIcons(document.body);
 
-// Files — PDF/DOCX on the server (api/data/files, same volume as SQLite)
+// Files live on the server (api/data/files); per-application files open
+// from the row buttons below, master resume from its card above.
 const fileUrl = n => '/api/files/' + encodeURIComponent(n);
-async function loadFiles(){
-  const el = qs('#fileList');
-  try{
-    const r = await fetch('/api/files');
-    if(!r.ok) throw 0;
-    const files = await r.json();
-    el.innerHTML = files.length ? files.map(f=>`
-      <div class="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2">
-        <span class="text-xs truncate flex-1" title="${esc(f.name)}">${esc(f.name)} <span class="mono text-[11px] text-zinc-500">${(f.size/1024).toFixed(0)} KB</span></span>
-        <button onclick="viewFile('${esc(f.name)}')" class="text-xs px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 min-h-[44px]">View</button>
-        <a href="${fileUrl(f.name)}?download=1" download="${esc(f.name)}" class="text-xs px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 min-h-[44px] flex items-center">Download</a>
-        <button onclick="delFile('${esc(f.name)}')" aria-label="Delete file" class="text-xs px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-500 hover:text-red-400 min-h-[44px]">✕</button>
-      </div>`).join('')
-      : '<p class="mono text-[11px] text-zinc-600">No files yet — upload your resume (PDF/DOCX, max 10MB).</p>';
-  }catch{ el.innerHTML = '<p class="mono text-[11px] text-zinc-600">Files need the server (offline right now).</p>'; }
-}
-window.uploadFiles = async input => {
-  for(const f of input.files){
-    if(!/\.(pdf|docx)$/i.test(f.name)){ toast(f.name + ' — only PDF/DOCX'); continue; }
-    if(f.size > 10*1024*1024){ toast(f.name + ' — over 10MB'); continue; }
-    const r = await fetch(fileUrl(f.name), {method:'PUT', body:f});
-    toast(r.ok ? 'Uploaded ' + f.name : 'Upload failed: ' + f.name);
-  }
-  input.value = ''; loadFiles();
-};
 function loadMammoth(){  // lazy: 600KB lib loads only on first DOCX view, tracker stays light
   return window.mammoth ? Promise.resolve()
     : new Promise((ok, bad) => { const s = document.createElement('script'); s.src = '../static/js/mammoth.min.js'; s.onload = ok; s.onerror = bad; document.head.appendChild(s); });
@@ -351,15 +314,6 @@ window.viewFile = async n => {
   }catch{ doc.innerHTML = '<p class="text-zinc-500">Preview failed — use Download.</p>'; }
 };
 window.closeViewer = () => { qs('#viewer').style.display = 'none'; qs('#viewerFrame').src = ''; qs('#viewerDoc').innerHTML = ''; };
-window.delFile = async n => {
-  let old = null;  // same Undo pattern as delApp — no blocking confirm on mobile
-  try{ const r = await fetch(fileUrl(n)); if(r.ok) old = await r.blob(); }catch{}
-  await fetch(fileUrl(n), {method:'DELETE'}); loadFiles();
-  toast(`Deleted ${esc(n)}`, 'Undo', async ()=>{
-    if(old) await fetch(fileUrl(n), {method:'PUT', body:old});
-    loadFiles();
-  });
-};
 if(window.refreshIcons) refreshIcons(document.body);
 </script>
 </body>
