@@ -202,7 +202,7 @@ function renderList(){
           ${STAGES.slice(1).map(s=>`<option value="${s.id}"${a.status===s.id ? ' selected' : ''}>${s.label}</option>`).join('')}
         </select>
         ${a.link ? `<a href="${esc(a.link)}" target="_blank" rel="noopener noreferrer" class="shrink-0 px-4 py-2 rounded-xl bg-white text-black text-xs font-semibold hover:bg-zinc-200 flex items-center min-h-[44px]">Open</a>` : ''}
-        ${(a.files||[]).map(f=>`<button onclick="viewFile('${esc(f)}')" title="View ${esc(f)} (download inside)" class="shrink-0 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-300 hover:border-zinc-600 text-xs mono min-h-[44px]">${/\.docx$/i.test(f)?'DOCX':'PDF'}</button>`).join('')}
+        ${(a.files||[]).map(f=>`<button onclick="viewFile('${esc(f)}','${esc(a.dl||'')}')" title="View ${esc(f)} (download inside)" class="shrink-0 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-300 hover:border-zinc-600 text-xs mono min-h-[44px]">${/\.docx$/i.test(f)?'DOCX':'PDF'}</button>`).join('')}
         <button onclick="editLink('${a.id}')" aria-label="Edit job posting link" class="shrink-0 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 text-xs mono min-h-[44px]">${a.link ? 'Edit link' : 'Add link'}</button>
         <button onclick="delApp('${a.id}')" aria-label="Delete" class="shrink-0 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-500 hover:text-red-400 hover:border-red-500/40 min-h-[44px]"><i data-lucide="trash" class="w-4 h-4 pointer-events-none"></i></button>
       </div>
@@ -296,9 +296,14 @@ function loadMammoth(){  // lazy: 600KB lib loads only on first DOCX view, track
   return window.mammoth ? Promise.resolve()
     : new Promise((ok, bad) => { const s = document.createElement('script'); s.src = '../static/js/mammoth.min.js'; s.onload = ok; s.onerror = bad; document.head.appendChild(s); });
 }
-window.viewFile = async n => {
-  qs('#viewerName').textContent = n;
-  qs('#viewerDl').href = fileUrl(n) + '?download=1';
+window.viewFile = async (n, dl='') => {
+  // Download with a friendly First_Last_Role name; the stored slug stays the server key.
+  const ext = /\.docx$/i.test(n) ? '.docx' : '.pdf';
+  const nice = (dl || n.slice(0, -ext.length)) + ext;
+  qs('#viewerName').textContent = nice;
+  const dlA = qs('#viewerDl');
+  dlA.href = fileUrl(n) + '?download=1';
+  dlA.download = nice;
   qs('#viewer').style.display = '';
   const frame = qs('#viewerFrame'), doc = qs('#viewerDoc');
   if(!/\.docx$/i.test(n)){ doc.style.display = 'none'; frame.style.display = ''; frame.src = fileUrl(n); return; }
