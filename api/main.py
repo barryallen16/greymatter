@@ -9,7 +9,7 @@ import sqlite3
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import unquote
+from urllib.parse import parse_qs, unquote
 
 DB = Path(__file__).parent / "data" / "store.db"
 DB.parent.mkdir(exist_ok=True)
@@ -56,13 +56,36 @@ class Handler(BaseHTTPRequestHandler):
             return None
         return name
 
-    def _send_file(self, name, download=False):
+    def _dl_name(self, name):
+        """Friendly download filename from ?as= (falls back to the stored name).
+
+        Same safety rules as stored names, plus the extension must match the
+        file's own type — an invalid alias is ignored, never an error, so
+        downloads keep working on browsers that ignore the `download` attr.
+        """
+        q = self.path.split("?", 1)[1] if "?" in self.path else ""
+        try:
+            alias = (parse_qs(q).get("as", [""])[0] or "").strip()
+        except ValueError:
+            return name
+        if not alias or len(alias) > 120 or alias.startswith("."):
+            return name
+        # ponytail: ASCII whitelist — blocks CR/LF header injection; non-Latin
+        # names fall back to the slug, add RFC 5987 encoding if that matters
+        if any(not (c.isascii() and (c.isalnum() or c in "._-")) for c in alias):
+            return name
+        suf = Path(alias).suffix.lower()
+        if suf not in FILE_TYPES or suf != Path(name).suffix.lower():
+            return name
+        return alias
+
+    def _send_file(self, name, download=False, as_name=None):
         f = FILES / name
         if not f.is_file():
             return self._send(404, b'{"error":"not found"}')
         data = f.read_bytes()
         ctype = FILE_TYPES[Path(name).suffix.lower()]
-        disp = ("attachment" if download else "inline") + f'; filename="{name}"'
+        disp = ("attachment" if download else "inline") + f'; filename="{as_name or name}"'
         self.send_response(200)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Disposition", disp)
@@ -82,7 +105,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, json.dumps(items).encode())
         name = self._fname()
         if name is not None:
-            return self._send_file(name, download="download" in (self.path.split("?", 1)[1] if "?" in self.path else ""))
+            return self._send_file(name, download="download" in (self.path.split("?", 1)[1] if "?" in self.path else ""), as_name=self._dl_name(name))
         key = self._key()
         if not key:
             return self._send(404, b'{"error":"not found"}')

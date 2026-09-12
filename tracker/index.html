@@ -302,7 +302,7 @@ window.viewFile = async (n, dl='') => {
   const nice = (dl || n.slice(0, -ext.length)) + ext;
   qs('#viewerName').textContent = nice;
   const dlA = qs('#viewerDl');
-  dlA.href = fileUrl(n) + '?download=1';
+  dlA.href = fileUrl(n) + '?download=1&as=' + encodeURIComponent(nice);
   dlA.download = nice;
   qs('#viewer').style.display = '';
   const frame = qs('#viewerFrame'), doc = qs('#viewerDoc');
