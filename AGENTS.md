@@ -5,6 +5,7 @@ Static site + tiny stdlib Python API + resume skill. Read this before doing anyt
 ## Layout
 
 - `tracker/` — job application tracker (the interactive app).
+- `jobs/` — ranked job list published by the separate **job-filter** project; reads KV key `jobfilter-jobs-v1`, and "Add to tracker" writes `tracker-apps-v1` using the same canonical (company, role) upsert as `publish.py`.
 - `api/main.py` — stdlib-only HTTP API: SQLite KV + PDF/DOCX file store. Runtime data in `api/data/` (gitignored, VPS volume — never commit).
 - `docs/` — markdown notes + viewer (`docs/index.html` fetches `./<file>`).
 - `roadmaps/`, `archive/` — roadmap pages; archive is a 5340-item viewer over root `results.enriched.jsonl` (keep both `results*.jsonl` at root — viewer and enrich script expect them there).
@@ -34,6 +35,23 @@ Base: local `http://127.0.0.1:8080` (`PORT=8080 uv run python api/main.py`), pro
   - `GET /api/files/<name>` views inline (PDF in an iframe; DOCX view prefers the sibling `<id>.pdf` when present, else renders in-page via vendored mammoth, `static/js/mammoth.min.js`, loaded lazily); append `?download=1` to force download.
   - `DELETE /api/files/<name>`.
   - Name rules: no leading dot, ≤120 chars, no `'"<>`, extension must be `.pdf`/`.docx` (else 404).
+
+## Job feed (from the job-filter project)
+
+`job-filter` is a separate repo (`~/Desktop/job-filter`) that scrapes boards + GCC career pages and ranks jobs. It publishes here so the list is readable on the phone:
+
+- KV key `jobfilter-jobs-v1` — scored jobs: `{id, title, company, location, job_url, site, source_type, description, score, match_reasons[], min_exp_years, max_exp_years, job_type, discovered_at}`. Written by `job-filter/publish.py`, rendered by `jobs/index.html`.
+- KV key `tracker-apps-v1` — `publish.py` merges the **shortlisted** jobs in as `saved` rows with id `jf-<job-filter id>`.
+
+**Identity rule — the one thing that must not drift.** Rows are matched on canonical (company, role): `canon(company, STOP_CO) + canon(role, STOP_TI)`. That rule is mirrored in three places — `job-filter/publish.py`, `jobs/index.html` (JS), and `ats-resume-creation-skill/scripts/tracker_push.py`. Change one and the resume skill starts adding a duplicate row for a posting that is already tracked.
+
+Publishing is **additive**: `status`, `type`, `followup`, `files` and any note or link edited on the phone are never overwritten by a re-run.
+
+```bash
+cd ~/Desktop/job-filter
+uv run python publish.py                                      # local API
+uv run python publish.py --url https://greymatter.isroot.in   # VPS
+```
 
 ## Resume skill → tracker (Hermes or any agent)
 

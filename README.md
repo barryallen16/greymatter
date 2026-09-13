@@ -1,6 +1,6 @@
 # Grey Matter — phone + laptop, from anywhere (VPS)
 
-Static site: **Docs** (`/`) + **Roadmaps** (`/roadmaps/`) + **Archive** (`/archive/` 5340 items). All tickboxes work on phone, persist in `localStorage`, no backend.
+Static site: **Docs** (`/`) + **Roadmaps** (`/roadmaps/`) + **Archive** (`/archive/` 5340 items) + **Tracker** (`/tracker/`) + **Jobs** (`/jobs/`). Tickboxes and the tracker work on the phone; state persists in the tiny stdlib KV API (`api/`, `localStorage` fallback when it's unreachable).
 
 **Fonts:** Geist + Geist Mono + Geist Pixel (`pixel` headlines, `mono` code). Loaded via Google Fonts + local `/static/fonts/*.ttf` (`/static/css/fonts.css` `GeistPixel` alias, `font-display: swap`). **Tailwind:** local `/static/css/tailwind.css` (built via `npm run build:css`, no CDN).
 
@@ -69,7 +69,11 @@ job-search/  (now Grey Matter, was job-search)
     index.html            → list of daily roadmaps (+ Tracker link)
     2026-09-02.html       → Heap Day 1 (27 ticks, localStorage, Export .md)
   tracker/
-    index.html            → Job application tracker (Saved→Applied→OA→Interview→Offer→Rejected, localStorage, Export .md)
+    index.html            → Job application tracker (Saved→Applied→OA→Interview→Offer→Rejected, Export .md)
+  jobs/
+    index.html            → Ranked jobs published by the separate job-filter project (KV key jobfilter-jobs-v1); "Add to tracker" seeds the tracker
+  api/
+    main.py               → stdlib KV + resume file store (keys: tracker-apps-v1, jobfilter-jobs-v1)
   archive/
     index.html            → Searchable archive of 5340 screenshots — filter by category, search, drawer detail (Geist Pixel), buttons vimium-hintable, yt_dlp_url fallback
     thumbs/               → derived webp thumbs (640px, q70, gitignored — rebuild via ./scripts/build_thumbs.sh, needs caesiumclt)
