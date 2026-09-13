@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jobs — Grey Matter</title>
+<meta name="description" content="Ranked GenAI jobs published by job-filter. Open a posting, or add it to the tracker as Saved.">
+<link rel="stylesheet" href="../static/css/tailwind.css">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/css/fonts.css">
+<link rel="icon" href="../favicon/favicon.ico" type="image/x-icon" />
+<link rel="icon" href="../favicon/favicon-32x32.png" sizes="32x32" type="image/png" />
+<link rel="icon" href="../favicon/favicon-16x16.png" sizes="16x16" type="image/png" />
+<link rel="apple-touch-icon" href="../favicon/apple-touch-icon.png" />
+<script src="../static/js/pixel-icons.js"></script>
+<script src="../static/js/storage.js"></script>
+<style>
+  *{font-family:"Geist",system-ui,sans-serif}
+  .mono{font-family:"Geist Mono",monospace}
+  .pixel{font-family:"GeistPixel","Geist",sans-serif;letter-spacing:-0.02em}
+  html{-webkit-text-size-adjust:100%}
+  input,select,textarea{font-size:16px !important}
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+  @supports(padding:max(0px)){body{padding-top:env(safe-area-inset-top)}}
+</style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen antialiased">
+<div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+
+  <div class="flex gap-2 mb-6 overflow-x-auto">
+    <a href="../roadmaps/" class="text-xs px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 flex items-center gap-2 shrink-0"><i data-lucide="clock" class="w-4 h-4"></i> Roadmaps</a>
+    <a href="../docs/" class="text-xs px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 flex items-center gap-2 shrink-0"><i data-lucide="file" class="w-4 h-4"></i> Docs</a>
+    <a href="../archive/" class="text-xs px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 flex items-center gap-2 shrink-0"><i data-lucide="archive" class="w-4 h-4"></i> Archive</a>
+    <a href="../tracker/" class="text-xs px-4 py-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-300 hover:bg-blue-500/20 flex items-center gap-2 shrink-0"><i data-lucide="send" class="w-4 h-4"></i> Tracker</a>
+  </div>
+
+  <div class="flex items-end gap-3">
+    <div class="flex-1 min-w-0">
+      <h1 class="pixel text-2xl font-bold">Jobs</h1>
+      <p class="text-sm text-zinc-500 mono mt-1"><span id="countLabel">0</span> ranked · <span id="trackedLabel">0</span> on tracker · <span id="saveState"></span></p>
+    </div>
+    <button onclick="reload()" aria-label="Reload from server" class="shrink-0 text-xs px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[44px] flex items-center gap-2"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
+  </div>
+
+  <input id="q" placeholder="Search title, company, location…" autocomplete="off" spellcheck="false" aria-label="Search jobs"
+    class="mt-4 w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 placeholder-zinc-500 text-sm focus:outline-none focus:border-emerald-500/60 min-h-[44px]">
+
+  <div class="flex gap-2 mt-3 overflow-x-auto pb-1" id="typeBar" style="scrollbar-width:none"></div>
+
+  <div id="list" class="mt-4 space-y-3"></div>
+
+  <div id="empty" style="display:none" class="text-center py-14 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/30">
+    <div class="pixel text-2xl">no jobs yet</div>
+    <p class="mono text-xs text-zinc-500 mt-1">Run <code class="text-zinc-400">uv run python publish.py</code> from job-filter to publish the ranked list here.</p>
+  </div>
+
+  <div class="mt-8 text-xs text-zinc-600 mono flex gap-2">
+    <a href="../tracker/" class="px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 flex-1 text-center">Tracker</a>
+    <a href="../roadmaps/" class="px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 flex-1 text-center">Roadmaps</a>
+    <a href="../docs/" class="px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 flex-1 text-center">Docs</a>
+  </div>
+</div>
+
+<div id="toast" role="status" style="display:none;bottom:calc(1rem + env(safe-area-inset-bottom))" class="fixed left-1/2 -translate-x-1/2 z-50 max-w-[calc(100vw-2rem)] items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg"></div>
+
+<script>
+// Ranked list published by job-filter to the Grey Matter KV store (key below).
+// Shortlisting here writes the SAME row the resume skill's tracker_push.py updates:
+// rows are matched on canonical (company, role), exactly like job-filter/publish.py.
+const KEY_JOBS = 'jobfilter-jobs-v1';
+const KEY_TRACKER = 'tracker-apps-v1';
+const TYPES = [{id:'all',label:'All'},{id:'fulltime',label:'Full-time'},{id:'intern',label:'Intern'}];
+let jobs = [];
+let tracked = [];
+let typeFilter = 'all';
+const qs = s => document.querySelector(s);
+
+// --- identity: mirrors publish.py (canon(company, STOP_CO) + canon(role, STOP_TI)) ---
+const STOP_CO = new Set(['pvt','private','ltd','limited','llp','inc','co','corp','the']);
+const STOP_TI = new Set(['hiring','for','job','openings','urgent','the','a','an','role','position']);
+const canon = (s, stop) => (s || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w && !stop.has(w)).join(' ');
+const jobKey = (c, r) => canon(c, STOP_CO) + '::' + canon(r, STOP_TI);
+
+function esc(s){ return (s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+const fmtDate = ts => { try { return new Date(ts).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}); } catch { return ''; } };
+const expStr = j => (j.min_exp_years != null || j.max_exp_years != null)
+  ? `${j.min_exp_years ?? 0}–${j.max_exp_years ?? '?'}y` : 'fresh/unspec';
+
+let toastTimer;
+function toast(msg, cls){
+  const el = qs('#toast');
+  el.className = `fixed left-1/2 -translate-x-1/2 z-50 max-w-[calc(100vw-2rem)] flex items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg ${cls || 'border-zinc-700 bg-zinc-900 text-zinc-100'}`;
+  el.innerHTML = `<span class="min-w-0 truncate">${msg}</span>`;
+  el.style.display = 'flex';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.style.display = 'none'; }, 3500);
+}
+
+async function load(){
+  qs('#saveState').textContent = 'loading…';
+  jobs = await storeGet(KEY_JOBS) || [];
+  tracked = await storeGet(KEY_TRACKER) || [];
+  if (!Array.isArray(jobs)) jobs = [];
+  if (!Array.isArray(tracked)) tracked = [];
+  qs('#saveState').textContent = jobs.length ? 'from server' : 'nothing published';
+  renderTypes();
+  render();
+}
+window.reload = () => load();
+
+function renderTypes(){
+  qs('#typeBar').innerHTML = TYPES.map(t =>
+    `<button type="button" onclick="setType('${t.id}')" aria-pressed="${typeFilter===t.id}" class="shrink-0 px-3.5 py-2.5 rounded-full border text-xs font-medium mono flex items-center gap-1.5 min-h-[44px] ${typeFilter===t.id ? 'bg-white text-black border-white' : 'bg-zinc-900 text-zinc-300 border-zinc-800'}">${t.label}</button>`
+  ).join('');
+}
+window.setType = id => { typeFilter = id; renderTypes(); render(); };
+
+function visible(){
+  const q = qs('#q').value.trim().toLowerCase();
+  return jobs.filter(j => {
+    if (typeFilter !== 'all' && (j.job_type || 'fulltime') !== typeFilter) return false;
+    if (!q) return true;
+    return `${j.title} ${j.company} ${j.location}`.toLowerCase().includes(q);
+  });
+}
+
+function trackedRow(j){
+  const key = jobKey(j.company, j.title);
+  return tracked.find(r => r.id === 'jf-' + j.id || jobKey(r.company || '', r.role || '') === key);
+}
+
+function render(){
+  const rows = visible();
+  qs('#countLabel').textContent = jobs.length;
+  qs('#trackedLabel').textContent = tracked.length;
+  qs('#empty').style.display = (jobs.length || qs('#q').value) ? 'none' : '';
+  qs('#list').innerHTML = rows.map(j => {
+    const row = trackedRow(j);
+    const reasons = (j.match_reasons || []).slice(0, 5);
+    return `
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex items-start gap-2">
+        <div class="min-w-0 flex-1">
+          <div class="font-semibold text-sm leading-tight">${esc(j.title)}</div>
+          <div class="mono text-[11px] text-zinc-500 mt-1 flex flex-wrap gap-x-2 gap-y-0.5">
+            <span class="text-zinc-400">${esc(j.company)}</span>
+            <span>${esc(j.location || '—')}</span>
+            <span>${esc(j.site || '')}</span>
+            <span>${esc(expStr(j))}</span>
+            ${(j.job_type === 'intern') ? '<span class="text-amber-400/90">intern</span>' : ''}
+            ${j.discovered_at ? `<span>${fmtDate(j.discovered_at)}</span>` : ''}
+            ${reasons.length ? `<span class="w-full text-zinc-500">${esc(reasons.join(' · '))}</span>` : ''}
+            ${j.description ? `<details class="w-full mt-1"><summary class="cursor-pointer text-zinc-500">Job description</summary><div class="text-zinc-400 whitespace-pre-line">${esc(j.description)}</div></details>` : ''}
+          </div>
+        </div>
+        <span class="mono text-[11px] px-2 py-0.5 rounded-full border shrink-0 bg-blue-500/15 text-blue-300 border-blue-500/20">${j.score ?? 0}</span>
+      </div>
+      <div class="flex gap-2 mt-3 flex-wrap">
+        ${j.job_url ? `<a href="${esc(j.job_url)}" target="_blank" rel="noopener noreferrer" class="shrink-0 px-4 py-2 rounded-xl bg-white text-black text-xs font-semibold hover:bg-zinc-200 flex items-center gap-2 min-h-[44px]"><i data-lucide="external-link" class="w-4 h-4"></i> Open</a>` : ''}
+        ${row
+          ? `<a href="../tracker/" class="shrink-0 px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/20 text-emerald-300 text-xs mono flex items-center gap-2 min-h-[44px]"><i data-lucide="check-circle" class="w-4 h-4"></i> On tracker — ${esc(row.status || 'saved')}</a>`
+          : `<button onclick="addToTracker('${j.id}')" class="shrink-0 px-4 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-300 hover:border-zinc-600 text-xs mono flex items-center gap-2 min-h-[44px]"><i data-lucide="plus" class="w-4 h-4"></i> Add to tracker</button>`}
+      </div>
+    </div>`;
+  }).join('');
+  if (window.refreshIcons) refreshIcons(qs('#list'));
+}
+
+function buildEntry(j){
+  const reasons = (j.match_reasons || []).slice(0, 6).join(', ');
+  const note = ('job-filter ' + (j.score ?? 0) + (reasons ? ' · ' + reasons : '')).slice(0, 200);
+  return {
+    id: 'jf-' + j.id,
+    company: j.company,
+    role: j.title,
+    link: j.job_url || '',
+    type: '',                 // classify after reading the JD, per the tracker
+    status: 'saved',
+    followup: '',
+    notes: note,
+    created: Date.parse(j.discovered_at) || Date.now(),
+    jd: (j.description || '').slice(0, 20000),
+  };
+}
+
+window.addToTracker = async id => {
+  const j = jobs.find(x => x.id === id);
+  if (!j) return;
+  const e = buildEntry(j);
+  const byId = {}, byKey = {};
+  tracked.forEach(r => { byId[r.id] = r; byKey[jobKey(r.company || '', r.role || '')] = r; });
+  const row = byId[e.id] || byKey[jobKey(e.company, e.role)];
+  if (row) {
+    // Additive, same rule as publish.py: never reset status/type/followup/files.
+    ['link', 'notes', 'jd', 'created'].forEach(f => { if (!row[f] && e[f]) row[f] = e[f]; });
+  } else {
+    tracked.push(e);
+  }
+  const ok = await storeSet(KEY_TRACKER, tracked);
+  render();
+  toast(ok ? `Saved to tracker — ${esc(j.company)}` : 'Saved in this browser only (server unreachable)',
+        ok ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300' : 'border-amber-500/40 bg-amber-500/10 text-amber-300');
+};
+
+qs('#q').addEventListener('input', render);
+load();
+if (window.refreshIcons) refreshIcons(document.body);
+</script>
+</body>
+</html>
