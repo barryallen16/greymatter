@@ -21,7 +21,7 @@ Based on a full read of all 34 repos. Fit scores reflect **evidence in your code
 | Role | Gap to close before applying |
 |---|---|
 | **ML Systems / Infra (junior)** | `tamil-tokenizer` already proves systems depth (Rust, Aho-Corasick, rayon, heap, `lto=true`); add CI + crates.io publish + `pyo3` Python binding and you can credibly chase this. |
-| **MLOps / ML Platform (junior)** | You have the orchestration instincts (`kaggle-automation`) but no Docker-in-a-clean-repo, no CI, no model registry/serving story. Add Dockerfile + GitHub Actions + a one-paragraph deploy doc to kaggle-automation → then apply |
+| **MLOps / ML Platform (junior)** | Orchestration + Docker + CI done in `kaggle-automation` (Sep 5: multi-stage `Dockerfile`, compose, pinned GH Actions, 79 tests, `uv` lockfile). Remaining: Postgres swap + Redis + README arch diagram + a one-paragraph deploy doc → then apply |
 | **Computer Vision Engineer (entry)** | Real but dated evidence: DeepLabV3/YOLOv8 prototype, counterfeit-detection concept (`bichecke`). Needs the leaked keys fixed + one clean writeup of the training notebook |
 | **Full-Stack (React/TS, startup tier)** | fitcheck-website + hackathon apps are real, but thin vs dedicated web devs. Only target startups that value the AI layer on top |
 | **SDE at product companies (Zoho-tier & above)** | Pure OA gate: your 2-problem NeetCode repo is disqualifying today. Nothing else matters until DSA volume is fixed |
@@ -40,7 +40,7 @@ Based on a full read of all 34 repos. Fit scores reflect **evidence in your code
 **Priority order, by expected return on effort:**
 
 1. **DSA volume — 50% of your study time.** Hard truth: it's the gate in front of everything. Service companies (TCS Digital, Infosys SP, Cognizant, Accenture), mid-tier product cos, and even many AI startups run OAs. Your auto-synced 2-problem repo actively hurts you. Target: 150+ problems before serious OA season, NeetCode 150 as the spine. Either grind it privately or let the sync make the repo look respectable again.
-2. **One flagship polished to depth, not five new projects — 25%.** `tamil-tokenizer` + `VulnChecker-Java` + fitcheck family are now the trio — make them defensible: cite VulnChecker as your real SFT proof (or delete the fitcheck distillation claim), extend fitcheck past 42 garments, add `cargo test`/`cargo bench` CI + crates.io publish to `tamil-tokenizer` (easiest win on the account), and Dockerfile + CI to `kaggle-automation`. Depth in 3 projects beats breadth in 20.
+2. **One flagship polished to depth, not five new projects — 25%.** `tamil-tokenizer` + `VulnChecker-Java` + fitcheck family are now the trio — make them defensible: cite VulnChecker as your real SFT proof (or delete the fitcheck distillation claim), extend fitcheck past 42 garments, add `cargo test`/`cargo bench` CI + crates.io publish to `tamil-tokenizer` (easiest win left — `kaggle-automation` Docker + CI already done Sep 5). Depth in 3 projects beats breadth in 20.
 3. **Ship the missing search layer on sivabharani-comments — 10%.** Turns your best scale story into a working product with a URL. One weekend of Meilisearch work.
 4. **Hygiene/security pass — 10%.** Revoke leaked tokens (Telegram, 2× OpenRouter), scrub PII from `middleman`, delete `Vadachennai`/`project01`/`salim`/empty repos, pin down AI-scaffold tells. Recruiters do click through.
 5. **Application infrastructure — 5%.** You already built ATS tools — actually use them. Track every application; you wrote the tracker.
@@ -68,7 +68,7 @@ Every resume bullet, LinkedIn headline, and cold DM should ladder up to that sen
 | Window | Action |
 |---|---|
 | **Now–Sep** | Security fixes + delete junk repos + README honesty pass (cite `VulnChecker-Java` to close gap). Add `tamil-tokenizer` CI + crates.io publish this week. Start DSA daily (non-negotiable). Apply to Tier-1 startup/NLP roles in parallel — early apps face less competition. |
-| **Sep–Oct** | Flagship polish (SFT run or claim removal, CI/Docker/tests on kaggle-automation, ship sivabharani search layer). Campus/off-campus drives begin in earnest — don't skip service-company drives; offers in hand change your negotiating posture. |
+| **Sep–Oct** | Flagship polish (SFT run or claim removal, Postgres/Redis/diagram on kaggle-automation — its Docker + CI + 79 tests done Sep 5, ship sivabharani search layer). Campus/off-campus drives begin in earnest — don't skip service-company drives; offers in hand change your negotiating posture. |
 | **Oct–Nov** | Volume phase: 15–20 targeted applications/week, referral mining (LinkedIn alumni from your college at target cos), Unstop/hackathons for extra signal if time permits. |
 
 ---

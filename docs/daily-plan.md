@@ -101,7 +101,7 @@ Unique Paths → Edit Distance (cross-check OS paging theory from your archive's
 | Phase | Weeks | Task |
 |---|---|---|
 | Cleanup | 1 | Revoke Telegram token + 2 OpenRouter keys, purge `.env` history, scrub `middleman` PII, delete Vadachennai/project01/salim/TensorTonic-Solutions |
-| kaggle-automation hardening | 2–5 | Dockerfile that passes `docker build .` → GitHub Actions CI (pytest + lint) → SQLite → Postgres in compose (one index + `EXPLAIN ANALYZE`) → Redis cache-aside + rate limit |
+| kaggle-automation hardening | 2–5 | Docker + CI done Sep 5 (`docker compose build/up`, pinned GH Actions `ruff`/`pytest`, 79 tests green) → remaining: SQLite → Postgres in compose (one index + `EXPLAIN ANALYZE`) → Redis cache-aside + rate limit → README arch diagram |
 | Ship one flagship | 6–9 | Pick **Gov scheme recommender** (RAG, your #1 ranked idea) **or** **Fresherr** (offer-letter checker). FastAPI + Postgres + tests + live URL |
 | Interview prep | 10–16 | 1 mock/week. 6 STAR stories mapped to your repos. Interview debrief doc within 24h of every round |
 

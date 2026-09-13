@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026-09-14 — Backend 30 (Gov-scheme build) — Grey Matter</title>
+<link rel="stylesheet" href="../static/css/tailwind.css">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/css/fonts.css">
+<link rel="icon" href="../favicon/favicon.ico" type="image/x-icon" />
+<link rel="icon" href="../favicon/favicon-32x32.png" sizes="32x32" type="image/png" />
+<link rel="icon" href="../favicon/favicon-16x16.png" sizes="16x16" type="image/png" />
+<link rel="apple-touch-icon" href="../favicon/apple-touch-icon.png" />
+<script src="../static/js/pixel-icons.js"></script>
+<style>
+  *{font-family:"Geist",system-ui,sans-serif}
+  .mono{font-family:"Geist Mono",monospace}
+  .pixel{font-family:"GeistPixel","Geist",sans-serif; letter-spacing:-0.02em}
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-thumb{background:#27272a;border-radius:8px}
+  .tick{width:20px;height:20px;min-width:20px; accent-color:#10b981; touch-action:manipulation}
+  @media (pointer:coarse){.tick{width:26px;height:26px;min-width:26px}}
+  .tick:checked+span{text-decoration:line-through;opacity:0.55}
+  .progress{transition:width .3s ease}
+  html{ -webkit-text-size-adjust: 100%; }
+  label{ touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  label:has(.tick){ padding: 6px 0; margin: -6px 0; }
+  @media (prefers-reduced-motion: reduce){.progress{transition:none}}
+  @supports(padding: max(0px)){ header{ padding-top: max(0.5rem, env(safe-area-inset-top)); } }
+</style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 antialiased">
+<header class="sticky top-0 z-30 bg-zinc-950/90 backdrop-blur border-b border-zinc-800" style="padding-top: env(safe-area-inset-top);">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between gap-3 sm:gap-4">
+    <div class="min-w-0 flex-1">
+      <h1 class="text-base sm:text-lg font-bold truncate">2026-09-14 <span class="text-zinc-500 font-normal">· Backend 30 (Gov-scheme build)</span></h1>
+      <p class="text-[11px] sm:text-xs text-zinc-500 mono truncate">Learn 30 backend topics by building · <span id="dateStr"></span> · <span id="saveState"></span></p>
+    </div>
+    <div class="text-right shrink-0">
+      <div class="text-sm font-semibold"><span id="doneCount">0</span>/<span id="totalCount">0</span></div>
+      <div class="w-24 sm:w-32 h-1.5 bg-zinc-800 rounded-full mt-1 overflow-hidden"><div id="progressBar" class="h-full bg-emerald-500 progress" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 pb-3 flex gap-2 overflow-x-auto scrollbar-none">
+    <button onclick="resetDay()" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px]">Reset</button>
+    <button onclick="exportMD()" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px]">Export .md</button>
+    <button onclick="document.getElementById('importFile').click()" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px]">Import .md</button>
+    <input type="file" id="importFile" accept=".md,text/markdown" class="hidden">
+    <a href="./index.html" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px] flex items-center">All roadmaps</a>
+    <a href="./2026-09-11.html" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px] flex items-center">← Sep 11</a>
+    <a href="../docs/" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-emerald-500 text-black font-semibold hover:bg-emerald-400 min-h-[40px] flex items-center">Docs</a>
+    <a href="../tracker/" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px] flex items-center">Tracker</a>
+  </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-5">
+  <div id="doneBanner" class="hidden rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-4 text-center text-sm"><span class="font-bold text-emerald-300">Roadmap complete.</span> <span class="text-zinc-300">Export .md as backup — streak &gt; perfection.</span></div>
+
+  <section class="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
+    <h2 class="font-bold text-emerald-400 text-sm flex items-center gap-2"><i data-lucide="rocket" class="w-4 h-4"></i> Project Edge</h2>
+    <p class="text-sm mt-1">You learn the 30 backend topics by building the <strong>Gov-scheme recommender</strong> (<a href="../docs/#ideas.md" class="text-emerald-400 underline">ideas.md</a> Tier S #1) — schemes CRUD on Postgres, eligibility rules engine, hybrid search, checkpoint-resume ingestion worker. Reference implementation for layering: your own <strong>kaggle-automation</strong> (8 routers, 79 tests) — mirror its shape, don't copy its code. Gate per phase: tests green + <code class="mono text-xs bg-zinc-800 px-1 rounded">docker compose up</code> green + one demoable endpoint.</p>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="space-y-3">
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-emerald-500 text-black px-2 py-0.5 rounded">Phase 1</span> API skeleton — HTTP to REST <span class="ml-auto text-emerald-400">10 ticks</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p1_skeleton"><span class="text-sm"><strong>HTTP + Routing:</strong> FastAPI app, routers/services split (<code class="mono text-xs bg-zinc-800 px-1 rounded">routers/schemes.py</code>, <code class="mono text-xs bg-zinc-800 px-1 rounded">services/</code>). Health route answers 200 with method + path logged.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p1_crud"><span class="text-sm"><strong>CRUD deep-dive:</strong> schemes table (SQLite first, Postgres in Phase 2) — create/read/update/delete + pagination (<code class="mono text-xs bg-zinc-800 px-1 rounded">limit/offset</code>) + correct 200/201/400/404.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p1_serial"><span class="text-sm"><strong>Serialisation:</strong> Pydantic v2 request/response models, strict types, one 422 sample captured in a test.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p1_validation"><span class="text-sm"><strong>Validation + transformation:</strong> field validators normalize scheme payloads (trim, lowercase enums, date parse) — invalid input returns the error envelope, never 500.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p1_errors"><span class="text-sm"><strong>Error handling:</strong> global handler → <code class="mono text-xs bg-zinc-800 px-1 rounded">{error:{code,message,request_id}}</code> for every failure path, tested.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p1_middleware"><span class="text-sm"><strong>Middlewares:</strong> request-ID + logging + CORS-locked-to-localhost, in that order. Explain why order matters.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p1_context"><span class="text-sm"><strong>Request context:</strong> request-scoped state via <code class="mono text-xs bg-zinc-800 px-1 rounded">contextvar</code> (request_id, user) — no globals leaking between requests.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p1_auth"><span class="text-sm"><strong>Auth:</strong> login route issuing signed HttpOnly cookie (or JWT bearer); every mutating route gated; one 401 test + one 403 test.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p1_openapi"><span class="text-sm"><strong>REST + OpenAPI:</strong> resource naming pass, <code class="mono text-xs bg-zinc-800 px-1 rounded">/docs</code> renders with summaries + examples for all routes.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p1_config"><span class="text-sm"><strong>Config mgmt (seed):</strong> <code class="mono text-xs bg-zinc-800 px-1 rounded">.env.example</code> with every var documented; app refuses to boot with a clear message when required config is missing.</span></label>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-blue-500 text-white px-2 py-0.5 rounded">Phase 2</span> Data + speed — DB, BLL, cache, search <span class="ml-auto text-blue-300">8 ticks</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p2_postgres"><span class="text-sm"><strong>Databases:</strong> SQLite → Postgres in compose; one real migration; one B-Tree index justified in one sentence.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p2_explain"><span class="text-sm"><strong>DB depth:</strong> <code class="mono text-xs bg-zinc-800 px-1 rounded">EXPLAIN ANALYZE</code> before/after the index on your slowest query — paste both outputs in the README.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p2_bll"><span class="text-sm"><strong>Business logic layer:</strong> eligibility engine returning <code class="mono text-xs bg-zinc-800 px-1 rounded">eligible / needs_info / failed</code> — rules are source of truth, LLM never overrides. Missing-age test included.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p2_cache"><span class="text-sm"><strong>Caching:</strong> Redis cache-aside on scheme lookups with TTL + explicit invalidation on update. Hit/miss visible in logs.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p2_ratelimit"><span class="text-sm"><strong>Rate limiting:</strong> IP-based limit on eligibility endpoint; 429 body matches the error envelope.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p2_search"><span class="text-sm"><strong>Elasticsearch:</strong> hybrid keyword + vector search over schemes (Meilisearch acceptable if ES is heavy) — 5 seeded queries return the right scheme top-1.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p2_eval"><span class="text-sm"><strong>Testing + quality:</strong> suite at 15+ tests (CRUD, BLL states, cache, search, auth) + <code class="mono text-xs bg-zinc-800 px-1 rounded">ruff</code> clean in CI.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p2_gate"><span class="text-sm"><strong>Phase gate:</strong> <code class="mono text-xs bg-zinc-800 px-1 rounded">pytest</code> green + compose green + eligibility endpoint demoed to one human.</span></label>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-violet-500 text-white px-2 py-0.5 rounded">Phase 3</span> Async + files + outside world <span class="ml-auto text-violet-300">9 ticks</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p3_queue"><span class="text-sm"><strong>Task queuing + scheduling:</strong> Redis-backed queue (arq/dramatiq, no Kafka) — ingestion job enqueues, worker consumes, status pollable.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p3_resume"><span class="text-sm"><strong>Checkpoint resume:</strong> ingestion worker pulls last checkpoint → resume, miss → fresh start (your <code class="mono text-xs bg-zinc-800 px-1 rounded">[RESUME] pulling checkpoint-9590</code> pattern). Kill mid-run once to prove it.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p3_storage"><span class="text-sm"><strong>Object storage + large files:</strong> scheme PDFs in S3-compatible store; downloads streamed from disk, never buffered in RAM.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p3_email"><span class="text-sm"><strong>Transactional emails:</strong> eligibility report email via SMTP/API with queued retry + one failure-path test.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p3_webhook"><span class="text-sm"><strong>Webhooks:</strong> signed inbound re-index webhook (HMAC verify, timestamp skew check) + one forged-signature rejection test.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p3_realtime"><span class="text-sm"><strong>Real-time:</strong> SSE streaming of eligibility answers; reconnect resumes without duplicates.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p3_concurrency"><span class="text-sm"><strong>Concurrency + parallelism:</strong> caps on parallel fetches/parses (kaggle's OOM-throttle lesson); document the number and why.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p3_errors"><span class="text-sm"><strong>Failure drills:</strong> worker crash, webhook forgery, storage miss — each returns the envelope + alert, each covered by a test.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p3_gate"><span class="text-sm"><strong>Phase gate:</strong> kill -9 the worker mid-ingest → restart resumes from checkpoint, zero duplicate emails sent.</span></label>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="bg-amber-500 text-black px-2 py-0.5 rounded">Phase 4</span> Production hardening <span class="ml-auto text-amber-400">8 ticks</span></div>
+      <div class="space-y-2 mt-3">
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p4_logging"><span class="text-sm"><strong>Logging, monitoring, observability:</strong> structured JSON logs with request_id + <code class="mono text-xs bg-zinc-800 px-1 rounded">/health</code> + one latency metric. Diagnose one slow request from logs alone.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p4_shutdown"><span class="text-sm"><strong>Graceful shutdown:</strong> lifespan handler drains queue + closes pools; in-flight request finishes, new ones get 503 during drain.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p4_security"><span class="text-sm"><strong>Security:</strong> headers pass, secrets only via env, auth rotate tested, dependency audit run once.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p4_scale"><span class="text-sm"><strong>Scaling + performance:</strong> state what breaks first at 1k rps (pool? cache? worker?) + the one fix you'd apply first.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p4_12factor"><span class="text-sm"><strong>12-factor pass:</strong> env-only config, stateless app, logs to stdout, backing services attached as resources — checklist in README.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p4_docker"><span class="text-sm"><strong>DevOps:</strong> multi-stage Dockerfile + compose (api/postgres/redis/search) + pinned CI running <code class="mono text-xs bg-zinc-800 px-1 rounded">ruff</code> + <code class="mono text-xs bg-zinc-800 px-1 rounded">pytest</code> on push.</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p4_live"><span class="text-sm"><strong>Live URL + README:</strong> deployed link + arch diagram + <code class="mono text-xs bg-zinc-800 px-1 rounded">EXPLAIN</code> outputs + interview answer for "missing age field without guessing?"</span></label>
+        <label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="p4_gate"><span class="text-sm"><strong>Final gate:</strong> fresh clone → <code class="mono text-xs bg-zinc-800 px-1 rounded">docker compose up</code> → full suite green → eligibility + search demoed end-to-end.</span></label>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-zinc-700 bg-zinc-800/30 p-4 text-center">
+      <p class="text-sm font-semibold">Minimum viable slice</p>
+      <p class="text-xs text-zinc-400 mt-1">Phase 1 ticks 1–3 (skeleton + CRUD + models) + one passing test — never zero.</p>
+      <label class="flex justify-center gap-2 mt-3 cursor-pointer"><input type="checkbox" class="tick" data-id="mvp"><span class="text-sm">MVP checked</span></label>
+    </div>
+
+  </section>
+
+  <section class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+    <h3 class="font-semibold text-sm">If you only do 3 things</h3>
+    <ol class="text-sm mt-2 space-y-1 list-decimal ml-5">
+      <li>Phase 1 skeleton + schemes CRUD + error envelope — the foundation everything plugs into</li>
+      <li>Phase 2 eligibility BLL with <code class="mono text-xs bg-zinc-800 px-1 rounded">eligible / needs_info / failed</code> + one Redis cache</li>
+      <li>Phase 3 checkpoint-resume ingestion worker — kill it mid-run and watch it resume</li>
+    </ol>
+    <p class="text-xs text-zinc-500 mt-3">Topic source: your 30-item backend list. Project source: <a href="../docs/#ideas.md" class="text-emerald-400 underline">docs · ideas.md Tier S #1</a>. Layering reference: kaggle-automation (mirror shape, not code).</p>
+  </section>
+
+  <div class="text-center text-xs text-zinc-600 mono py-4">
+    You build the project — this page only tracks it. One phase at a time.
+  </div>
+</main>
+
+<div id="toast" role="status" style="display:none;bottom:calc(1rem + env(safe-area-inset-bottom))" class="fixed left-1/2 -translate-x-1/2 z-50 max-w-[calc(100vw-2rem)] items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg"></div>
+
+<script src="../static/js/storage.js"></script>
+<script>
+  const KEY='roadmap-2026-09-14-backend-30';
+  const checks=document.querySelectorAll('.tick:not([disabled])');
+  document.getElementById('totalCount').textContent=checks.length;
+  document.getElementById('dateStr').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'});
+  async function load(){
+    const s=await storeGet(KEY) || {};
+    checks.forEach(c=>{ if(s[c.dataset.id]) c.checked=true; });
+    update();
+  }
+  function setSaveState(state){
+    document.getElementById('saveState').textContent = state==='saving' ? 'saving…'
+      : state==='ok' ? 'saved'
+      : 'NOT saved — server unreachable';
+  }
+  async function save(){
+    setSaveState('saving');
+    setSaveState(await storeSet(KEY, await (async()=>{ const s={}; checks.forEach(c=>{ s[c.dataset.id]=c.checked; }); return s; })()) ? 'ok' : 'local');
+  }
+  function update(){
+    const done=[...checks].filter(c=>c.checked).length;
+    document.getElementById('doneCount').textContent=done;
+    document.getElementById('progressBar').style.width=(done/checks.length*100)+'%';
+    const banner=document.getElementById('doneBanner');
+    const wasDone=banner.dataset.done==='1';
+    const isDone=checks.length && done===checks.length;
+    banner.classList.toggle('hidden', !isDone);
+    if(isDone && !wasDone) toast('Roadmap complete — '+done+'/'+checks.length+' ticks', null, null, 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300');
+    banner.dataset.done=isDone?'1':'0';
+  }
+  checks.forEach(c=>c.addEventListener('change',()=>{save();update();}));
+  function resetDay(){
+    lastState={}; checks.forEach(c=>{ lastState[c.dataset.id]=c.checked; });
+    if(!confirm('Reset all ticks for this roadmap?')) return;
+    storeDel(KEY); checks.forEach(c=>c.checked=false); update();
+    toast('Ticks cleared', 'Undo', undoReset);
+  }
+  function undoReset(){
+    storeSet(KEY, lastState); checks.forEach(c=>{ c.checked=!!lastState[c.dataset.id]; }); update();
+  }
+  let lastState={};
+
+  let toastTimer;
+  function toast(msg, actionLabel, actionFn, cls){
+    const el=document.getElementById('toast');
+    el.className=`fixed left-1/2 -translate-x-1/2 z-50 max-w-[calc(100vw-2rem)] flex items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg ${cls || 'border-zinc-700 bg-zinc-900 text-zinc-100'}`;
+    el.innerHTML=`<span class="min-w-0 truncate">${msg}</span>`+(actionLabel?`<button type="button" class="shrink-0 mono text-xs px-3 py-2 rounded-lg bg-white text-black font-semibold min-h-[44px]">${actionLabel}</button>`:'');
+    if(actionLabel) el.querySelector('button').onclick=()=>{ actionFn(); el.style.display='none'; };
+    el.style.display='flex';
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>{ el.style.display='none'; }, actionLabel?6000:3500);
+  }
+  function exportMD(){
+    let md='# 2026-09-14 Backend 30 Roadmap\n\nProgress '+document.getElementById('doneCount').textContent+'/'+document.getElementById('totalCount').textContent+'\n\n';
+    checks.forEach(c=>{
+      const label=c.parentElement.innerText.trim().replace(/\s+/g,' ');
+      md+='- ['+(c.checked?'x':' ')+'] '+label+'\n';
+    });
+    const blob=new Blob([md],{type:'text/markdown'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='2026-09-14-backend-30.md'; a.click();
+  }
+  document.getElementById('importFile').addEventListener('change', e=>{
+    const f = e.target.files[0];
+    if(f) importMD(f);
+    e.target.value = '';
+  });
+  function importMD(file){
+    const r = new FileReader();
+    r.onload = ()=>{
+      const map = {};
+      String(r.result||'').split('\n').forEach(line=>{
+        const m = line.match(/^-\s*\[(x| )\]\s*(.+)$/i);
+        if(m) map[m[2].trim().replace(/\s+/g,' ').toLowerCase()] = m[1].toLowerCase()==='x';
+      });
+      let matched=0;
+      checks.forEach(c=>{
+        const label = c.parentElement.innerText.trim().replace(/\s+/g,' ').toLowerCase();
+        if(label in map){ c.checked = map[label]; matched++; }
+      });
+      save(); update();
+      const total = Object.keys(map).length;
+      toast(matched ? `Imported ${matched}/${total} tasks` : 'No tasks matched this file — labels must match the page', null, null, matched ? null : 'border-amber-500/40 bg-amber-500/10 text-amber-300');
+    };
+    r.readAsText(file);
+  }
+  load();
+  if(window.refreshIcons) refreshIcons(document.body);
+</script>
+</body>
+</html>

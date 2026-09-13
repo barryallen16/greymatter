@@ -1,6 +1,6 @@
 # Full GitHub Repo Audit — barryallen16 (Jayadithya R)
 
-*All 34 public repos cloned, read, and analyzed line-by-line. August 2026. Updated 2026-09-01 to include `tamil-tokenizer` (pushed 2026-08-28).*
+*All 34 public repos cloned, read, and analyzed line-by-line. August 2026. Updated 2026-09-01 to include `tamil-tokenizer` (pushed 2026-08-28); `kaggle-automation` re-audited 2026-09-13 to head `cc8f2d7` (Docker + CI + uv + 79 tests).*
 
 ---
 
@@ -22,7 +22,7 @@
 | Rank | Repo | Score | LOC (first-party) | Tests | Verdict in one line |
 |---|---|---|---|---|---|
 | 1 | tamil-tokenizer | **8.5/10** | ~1,810 (Rust) | ✅ 23 tests | Best differentiator — Rust BPE with Aho-Corasick, rayon + heap-optimized trainer, HF-published 32K tokenizer (11–16× faster than HF/SentencePiece on Tamil) |
-| 2 | kaggle-automation | **8/10** | ~4,300 | ✅ real | Best backend engineering — layered FastAPI, shard distribution, session monitors, secrets hygiene |
+| 2 | kaggle-automation | **8.5/10** | ~6,100 app/ | ✅ 79 tests / 12 files | Best backend engineering — 8-router FastAPI, versioned output recovery, Docker + CI + uv, secrets hygiene |
 | 3 | VulnChecker-Java | **8/10** | ~1,200 + 1GB pipeline | ✅ 102-case eval | Real LoRA SFT: 7-stage data pipeline (synthetic + dedup) → Unsloth r=64/α16 → 7B beats 14B (80.39% on 102 cases) |
 | 4 | ats-resume-creation-skill | **7.5/10** | ~680 py | ❌ | Best code-per-line judgment calls; small scope |
 | 5 | sivabharani-comments | **7/10** | ~900 | ❌ | Best scale story (1.18M chunks); product never shipped, 1 sloppy commit |
@@ -74,14 +74,15 @@ A high-performance **BPE tokenizer for Tamil** in Rust — the one project on yo
 
 Fine-tuned Qwen2.5-Coder for Java vulnerability detection end-to-end (pushed to `barryallen16/VulnChecker-Java`, datasets on HF). Cures the audit's biggest gap: fitcheck's "LLM fine-tuning" was inference-only; *this* repo is actual `SFTTrainer` + `get_peft_model` with LoRA r=64/α=16 and a 102-case eval harness where the 7B beats the 14B (80.39%). Own this story and the earlier honesty gap disappears.
 
-### 3. kaggle-automation — 8/10 *(pushed Aug 24, 2026)*
+### 3. kaggle-automation — 8.5/10 *(re-audited Sep 13, 2026 — head `cc8f2d7`, was 8/10 on Aug 24)*
 Pools multiple Kaggle API keys to run parallel GPU workloads; auto-shards datasets across accounts; central FastAPI dashboard monitors 12-hour sessions.
 
-- **Architecture:** proper FastAPI layering — 6 routers (`accounts/runs/distributed/logs/files/settings`), service layer (`WorkloadDistributor`, `AccountManager`, `SessionMonitor`, `KaggleService`, `TelegramService`), SQLite persistence, Jinja UI. ~4,300 LOC.
-- **Genuinely good engineering:** notebook-shard-config injection (handles `.ipynb` JSON correctly), background 12h-session monitor via lifespan hooks, auth token gating with loud warning when unset, CORS locked to localhost, correct `.gitignore` (`.env`, `kaggle.json`, `*.db`) — verified nothing sensitive is tracked.
-- **Tests:** `test_inference_script.py` (383 ln), `test_distributor.py` (246), `test_automation.py` (123) — the only repo besides fitcheck-app with real tests.
+- **Architecture:** proper FastAPI layering — 8 routers (`accounts/runs/distributed/logs/files/settings/kernels/ops`), service layer (`WorkloadDistributor`, `AccountManager`, `SessionMonitor`, `KaggleService`, `TelegramService`, `OpsTracker`, versioned-output helper), SQLite persistence (WAL + `busy_timeout`, lightweight migrations), Jinja UI. ~6,100 LOC in `app/`.
+- **Genuinely good engineering:** notebook-shard-config injection (handles `.ipynb` JSON correctly), background 12h-session monitor via lifespan hooks, auth token gating with loud warning when unset, CORS locked to localhost, HMAC-signed HttpOnly cookies, correct `.gitignore` (`.env`, `kaggle.json`, `*.db`) — verified nothing sensitive is tracked. API keys masked (`KGAT_a...xyz`), per-account `KAGGLE_CONFIG_DIR` isolation, tests isolated via `AUTOMATION_DATA_DIR`.
+- **Since Aug 24 (the delta):** `pip` → `uv` (`pyproject.toml` + `uv.lock`, `uv sync --locked`); multi-stage `Dockerfile` (`python:3.12-slim-trixie`, builder/runner) + `docker-compose.yml` (Sep 5); GitHub Actions CI — pinned `actions/checkout`, `setup-python`, `setup-uv`, `uv sync --locked` → `ruff check` → `pytest tests` (Sep 5); account kernels explorer with full version history (parallel probing, per-version output pull, v1/`GetKernel` fallbacks); version-aware partial-output recovery for stopped/failed runs; merge cart + per-account GPU sessions + quota guard + output preservation; manual sharding + quota-sorted accounts; zero-quota accounts flagged CPU-only; quota-aware `MAX_RUNTIME` injection; throttled distributed pushes/status checks (OOM fix for 16-account launches); new notebook stop mechanism; Telegram modes (`off`/`errors-only`/`full`) with in-memory 11h dedup; `HF_TOKEN` + `WANDB_API_KEY` injection into kernels; concurrency caps + timeouts all env-tunable (`.env.example` ~63 lines); mobile-responsive dashboard + new palette + persistent loading states.
+- **Tests:** 79 passed (`pytest tests`, ~24s) across 12 files — `test_distributor` (13), `test_quota_runtime_cap` (23), `test_inference_script` (9), `test_versioned_helper` (8), plus quota-refresh, stop-capture, stopped-pulls, username-autocorrect, clear-notebooks, ops-tracker, merge-cat, automation. Was 3 files on Aug 24.
 - **Interview angle:** "distributed compute orchestration over constrained free-tier GPU quotas" — scheduling, sharding, failure monitoring, alerting.
-- **To reach 9/10:** Dockerfile, GitHub Actions CI, README architecture diagram.
+- **Remaining gaps (no longer Docker/CI):** still SQLite (no Postgres, no `EXPLAIN ANALYZE` evidence), no Redis cache-aside/rate-limit, no README architecture diagram.
 
 ### 2. fitcheck family — treat as ONE project story (7/10 combined)
 The narrative arc most freshers can't tell: synthetic data generation → crowdsourced preference labeling → classical CV prototype → CLIP+rules hybrid recommender → full-stack app → human eval harness. Published HF dataset (`barryallen16/fitcheck-annotate-dataset`) is externally verifiable.
@@ -175,7 +176,7 @@ Hand-written vanilla HTML/Tailwind CDN/GSAP; Tanglish copy, pixel-reveal hero an
 
 1. **DSA evidence: 2 problems / 17 lines** (neetcode-submissions, auto-synced). This outweighs every project on the account during screening. Aug-2026 fresher bar: 150–300+.
 2. **Every repo is a single squashed commit** — no visible process, nothing for git archaeology to validate.
-3. **Almost zero CI (now 1 bright spot), tests in exactly 3 repos, Docker only inside the messiest repo.** tamil-tokenizer's 23 tests are the counter-example — lean into it. Add CI there first; it becomes the template.
+3. **CI + Docker now exist in 2 repos, tests in exactly 2 strong repos.** `tamil-tokenizer` still the test counter-example (23 tests) — but `kaggle-automation` now has 79 tests across 12 files + pinned GH Actions CI (`ruff` + `pytest`) + multi-stage `Dockerfile` + compose (all Sep 5). Add CI to `tamil-tokenizer` next; it becomes the Rust template.
 4. **AI-scaffold fingerprints**: `/mnt/okcomputer/output`, kimi-plugin devDependency, CLAUDE.md/AGENTS.md files, emoji-dense LLM-style docs, DEPLOYMENT.md embedded in a test string. Assume interviewers know the tells; your defense is explaining every architectural decision unprompted.
 5. **README honesty gaps — now partially cured:** fitcheck's "LLM fine-tuning" was inference-only, but **VulnChecker-Java proves you *have* done real LoRA SFT** — cite it explicitly to close the gap. Remaining gaps: movie-recommendations technique mislabel, Vadachennai name/package mismatch, oversold persona/try-on features, tamil-tokenizer speed claim (defensible but benchmark hardware must be stated — run `cargo bench` on the reviewer's machine).
 6. **What's genuinely differentiated:** tokenizer infra for an underrepresented language (Rust + Aho-Corasick + rayon + heap-optimized BPE), eval culture (human eval harness *and* tokenizer fertility/compression metrics), inference-strategy spectrum (local LM Studio → cloud → in-browser transformers.js → quantized Unsloth), scale instincts (1.18M chunks, proxy rotation, checkpoint resume), and compute-hacking creativity (kaggle-automation). Add `tamil-tokenizer` to every intro — it alone separates you from 100 LLM-wrapper portfolios.
@@ -186,4 +187,4 @@ Hand-written vanilla HTML/Tailwind CDN/GSAP; Tanglish copy, pixel-reveal hero an
 2. DSA daily grind — decides whether anything else gets read.
 3. FitCheck honesty pass: cite VulnChecker-Java as your real SFT proof (or delete the fitcheck distillation claim); remove okcomputer/kimi tells and the artificial sleep; fix stale tests.
 4. Ship sivabharani-comments' missing search layer (Meilisearch + tiny frontend) — turns the best scale story into a product with a URL.
-5. kaggle-automation **and** tamil-tokenizer: Dockerfile + GitHub Actions + architecture diagrams in READMEs. tamil-tokenizer's CI is the easiest win on the account — `cargo test && cargo bench` — do it first and reuse the workflow.
+5. kaggle-automation **Docker + CI done (Sep 5)** — remaining: Postgres swap, Redis cache-aside/rate-limit, README architecture diagram. tamil-tokenizer still needs: CI (`cargo test` + `cargo bench`) first, then crates.io + diagram.

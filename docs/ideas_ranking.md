@@ -12,14 +12,14 @@
 
 `roadmap.sh/backend` fetched Sep 1 was JS-heavy shell, but standard 2026 backend track is stable:
 
-**You already cover:** Python, Git/GitHub, FastAPI (`kaggle-automation` 6 routers), basic SQL, Docker/CI (tomorrow's task).
+**You already cover:** Python, Git/GitHub, FastAPI (`kaggle-automation` 8 routers, re-audited Sep 13), basic SQL, Docker/CI (done Sep 5: multi-stage `Dockerfile` + compose + pinned GH Actions `ruff`/`pytest`).
 
 **Missing — add as 15-min micro-ticks, not new projects:**
 
 1. **Relational DB depth** — PostgreSQL not SQLite: `ACID, indexes (B-Tree), normalization 1NF/2NF, EXPLAIN` — needed for *any* RAG scheme/complaint DB (`ideas.md:30` gov schemes). Do in `kaggle-automation` by swapping SQLite → Postgres in `docker-compose`.
 2. **Caching + Rate limiting** — Redis `cache-aside` + IP rate limiter. `roadmap.sh` lists it before queues. You have no Redis evidence. Add to `kaggle-automation` `/health` + `SlowAPI` like `GovAssist` does.
 3. **Auth + API security** — JWT/OAuth2, `12 Tips for API Security` `career.txt:240` (HTTPS, OAuth2, leveled keys, rate limit). Your `new-prince-hackathon` shipped JWT but never validated `repo-analysis.md:14`.
-4. **Testing + CI/CD beyond lint** — `fresher-must-have-skills-2026` 10-point checklist: pytest with fixtures, not just `hl` — `tamil-tokenizer` has 23 tests, `kaggle-automation` has 3. Need 10-20 unit tests + GH Actions.
+4. **Testing + CI/CD beyond lint** — `fresher-must-have-skills-2026` 10-point checklist: pytest with fixtures, not just `hl` — `tamil-tokenizer` has 23 tests, `kaggle-automation` has 79 tests across 12 files + GH Actions (done Sep 5). Still missing: `tamil-tokenizer` CI.
 5. **Web server / Deploy** — Nginx reverse proxy, `docker-compose` healthcheck (your `moviemod-scraper` has one but 1639-line monolith). Tomorrow's `docker build` must pass, then `Render/Railway` live URL.
 
 *Don't touch yet:* GraphQL/gRPC, Kafka/RabbitMQ, Kubernetes — explicitly `Recruiter Bluff` for freshers `fresher-must-have-skills-2026.md:232`.

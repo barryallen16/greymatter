@@ -70,7 +70,7 @@ Keyword hits across 524: `ai:222, data:96, python:44, java:32, resume:31, projec
 | 27 | `These GitHub repos will make you 10X` | how-web-works, developer-roadmap... | `career.txt:142` | Matches `sindresorhus/awesome` `dump.txt:230` |
 | 28 | `The image provides career advice for CS majors` (repeat but project angle) | Build 3 good projects | `career.txt:247` | Treat `fitcheck` family as ONE story `repo-analysis.md:86` |
 
-**Action:** Polish `kaggle-automation` (add `Dockerfile + GH Actions` `repo-analysis.md:84`) + one RAG FAQ chatbot (light, defensible) — not 10 new ideas. Addresses `projects never finished` notebook.
+**Action:** `kaggle-automation` Docker + GH Actions done Sep 5 (79 tests green) — next is Postgres/Redis/diagram `repo-analysis.md:77` + one RAG FAQ chatbot (light, defensible) — not 10 new ideas. Addresses `projects never finished` notebook.
 
 ### D. Resume, ATS & Interview Craft (Type C + Behavioral)
 
@@ -155,7 +155,7 @@ Keyword hits across 524: `ai:222, data:96, python:44, java:32, resume:31, projec
 
 *   **DSA:** Heap via `aman.ai/code/heap` + `Top 5 Books DSA Grokking` + `93 patterns` `career.txt:420` — not random books.
 *   **SQL:** `SQL Murder Mystery` weekend, then `SQL Most important` window functions `career.txt:497` — matches `fresher-must-have-skills-2026.md:84`.
-*   **Projects:** One `kaggle-automation Dockerfile` commit (show work `Varun Mayya`) + log subtle AI errors (Type B) — not 10 ideas.
+*   **Projects:** `kaggle-automation` Postgres/Redis/diagram next (Docker + CI commit done Sep 5, show work `Varun Mayya`) + log subtle AI errors (Type B) — not 10 ideas.
 *   **Apps:** `site:lever.co OR site:greenhouse.io` `career.txt:267` early + `Naukri` daily update + ask recruiter `what to prioritize` template + classify Type A/B/C/D per JD.
 *   **Portfolio:** Fix resume to `1 page X-Y-Z` `career.txt:354` + `LinkedIn Headline [Role|Keywords|Proof]` `career.txt:276` + why that stack story for `tamil-tokenizer/kaggle`.
 
