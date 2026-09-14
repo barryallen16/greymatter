@@ -85,8 +85,17 @@ function esc(s){ return (s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&l
 const fmtDate = ts => { try { return new Date(ts).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}); } catch { return ''; } };
 // ponytail: 24h window mirrors job-filter RECENT_HOURS; unparseable dates never badge.
 const isNew = ts => { const t = Date.parse(ts || ''); return Number.isFinite(t) && Date.now() - t < 24*3600e3; };
-const expStr = j => (j.min_exp_years != null || j.max_exp_years != null)
-  ? `${j.min_exp_years ?? 0}–${j.max_exp_years ?? '?'}y` : 'fresh/unspec';
+const PILL = 'mono text-[11px] px-2 py-0.5 rounded-full border shrink-0';
+// ponytail: 0-2 / 3-ceiling mirrors engine/scorer.py. Change the gate, change this too.
+const fitBadge = j => {
+  if (j.min_exp_years == null && j.max_exp_years == null)
+    return `<span class="${PILL} bg-zinc-800 text-zinc-400 border-zinc-800">exp unstated</span>`;
+  const over = (j.min_exp_years ?? 0) > 2 || (j.max_exp_years ?? 0) > 3;
+  const exp = `${j.min_exp_years ?? 0}–${j.max_exp_years ?? '?'}y`;
+  return over
+    ? `<span class="${PILL} bg-amber-500/15 text-amber-300 border-amber-500/20">${exp} · exceeds fresher</span>`
+    : `<span class="${PILL} bg-emerald-500/15 text-emerald-300 border-emerald-500/20">${exp} · fresher fit</span>`;
+};
 
 let toastTimer;
 function toast(msg, cls){
@@ -120,6 +129,7 @@ window.setType = id => { typeFilter = id; renderTypes(); render(); };
 function visible(){
   const q = qs('#q').value.trim().toLowerCase();
   return jobs.filter(j => {
+    if (j.judge === 'drop') return false;
     if (typeFilter !== 'all' && (j.job_type || 'fulltime') !== typeFilter) return false;
     if (!q) return true;
     return `${j.title} ${j.company} ${j.location}`.toLowerCase().includes(q);
@@ -133,7 +143,7 @@ function trackedRow(j){
 
 function render(){
   const rows = visible();
-  qs('#countLabel').textContent = jobs.length;
+  qs('#countLabel').textContent = rows.length;
   qs('#trackedLabel').textContent = tracked.length;
   qs('#empty').style.display = (jobs.length || qs('#q').value) ? 'none' : '';
   qs('#list').innerHTML = rows.map(j => {
@@ -149,7 +159,7 @@ function render(){
             <span class="text-zinc-400">${esc(j.company)}</span>
             <span>${esc(j.location || '—')}</span>
             <span>${esc(j.site || '')}</span>
-            <span>${esc(expStr(j))}</span>
+            ${fitBadge(j)}
             ${(j.job_type === 'intern') ? '<span class="text-amber-400/90">intern</span>' : ''}
             ${posted ? `<span>${fmtDate(posted)}</span>` : ''}
             ${isNew(posted) ? '<span class="mono text-[11px] px-2 py-0.5 rounded-full border shrink-0 bg-emerald-500/15 text-emerald-300 border-emerald-500/20">NEW</span>' : ''}
