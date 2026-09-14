@@ -132,6 +132,8 @@ function visible(){
   const q = qs('#q').value.trim().toLowerCase();
   return jobs.filter(j => {
     if (j.judge === 'drop') return false;
+    // Apply-now list: hide any stated band that needs experience.
+    if ((j.min_exp_years ?? 0) > 0 || (j.max_exp_years ?? 0) > 3) return false;
     if (typeFilter !== 'all' && (j.job_type || 'fulltime') !== typeFilter) return false;
     if (!q) return true;
     return `${j.title} ${j.company} ${j.location}`.toLowerCase().includes(q);
