@@ -25,7 +25,7 @@
 </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen antialiased">
-<div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
 
   <div class="flex gap-2 mb-6 overflow-x-auto">
     <a href="../roadmaps/" class="text-xs px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 flex items-center gap-2 shrink-0"><i data-lucide="clock" class="w-4 h-4"></i> Roadmaps</a>
@@ -47,7 +47,7 @@
 
   <div class="flex gap-2 mt-3 overflow-x-auto pb-1" id="typeBar" style="scrollbar-width:none"></div>
 
-  <div id="list" class="mt-4 space-y-3"></div>
+  <div id="list" class="mt-4 grid gap-3 sm:grid-cols-2 items-start">
 
   <div id="empty" style="display:none" class="text-center py-14 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/30">
     <div class="pixel text-2xl">no jobs yet</div>
@@ -83,6 +83,8 @@ const jobKey = (c, r) => canon(c, STOP_CO) + '::' + canon(r, STOP_TI);
 
 function esc(s){ return (s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 const fmtDate = ts => { try { return new Date(ts).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}); } catch { return ''; } };
+// ponytail: 24h window mirrors job-filter RECENT_HOURS; unparseable dates never badge.
+const isNew = ts => { const t = Date.parse(ts || ''); return Number.isFinite(t) && Date.now() - t < 24*3600e3; };
 const expStr = j => (j.min_exp_years != null || j.max_exp_years != null)
   ? `${j.min_exp_years ?? 0}–${j.max_exp_years ?? '?'}y` : 'fresh/unspec';
 
@@ -137,6 +139,7 @@ function render(){
   qs('#list').innerHTML = rows.map(j => {
     const row = trackedRow(j);
     const reasons = (j.match_reasons || []).slice(0, 5);
+    const posted = j.date_posted || j.discovered_at;
     return `
     <div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
       <div class="flex items-start gap-2">
@@ -148,7 +151,8 @@ function render(){
             <span>${esc(j.site || '')}</span>
             <span>${esc(expStr(j))}</span>
             ${(j.job_type === 'intern') ? '<span class="text-amber-400/90">intern</span>' : ''}
-            ${j.discovered_at ? `<span>${fmtDate(j.discovered_at)}</span>` : ''}
+            ${posted ? `<span>${fmtDate(posted)}</span>` : ''}
+            ${isNew(posted) ? '<span class="mono text-[11px] px-2 py-0.5 rounded-full border shrink-0 bg-emerald-500/15 text-emerald-300 border-emerald-500/20">NEW</span>' : ''}
             ${reasons.length ? `<span class="w-full text-zinc-500">${esc(reasons.join(' · '))}</span>` : ''}
             ${j.description ? `<details class="w-full mt-1"><summary class="cursor-pointer text-zinc-500">Job description</summary><div class="text-zinc-400 whitespace-pre-line">${esc(j.description)}</div></details>` : ''}
           </div>
