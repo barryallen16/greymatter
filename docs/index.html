@@ -236,17 +236,30 @@
     content.innerHTML = marked.parse(md);
     // auto-TOC (Miller: chunk long docs) — no deps, headings only
     const hs = [...content.querySelectorAll('h2, h3')];
+    const seen = {};
+    hs.forEach(h => {
+      let id = h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      if (!id) id = 'section';
+      if (seen[id] != null) { seen[id]++; id += '-' + seen[id]; } else seen[id] = 0;
+      h.id = id;
+    });
     if (hs.length > 2) {
       const box = document.createElement('details');
       box.id = 'tocWrap';
       box.className = 'mb-6 rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm not-prose';
       if (window.innerWidth >= 1024) box.open = true;
       box.innerHTML = '<summary class="cursor-pointer font-semibold text-zinc-200">On this page</summary>' +
-        hs.map(h => {
-          if (!h.id) h.id = h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
-          return `<a href="#${h.id}" class="block ${h.tagName === 'H3' ? 'pl-4 text-zinc-400' : 'text-zinc-200'} py-1 hover:text-emerald-300">${h.textContent}</a>`;
-        }).join('');
+        hs.map(h => `<a href="#${activeFile}--${h.id}" data-toc="${h.id}" class="block ${h.tagName === 'H3' ? 'pl-4 text-zinc-400' : 'text-zinc-200'} py-1 hover:text-emerald-300">${escapeHtml(h.textContent)}</a>`).join('');
       content.prepend(box);
+      box.querySelectorAll('a[data-toc]').forEach(a => {
+        a.addEventListener('click', e => {
+          e.preventDefault();
+          const el = document.getElementById(a.dataset.toc);
+          if (!el) return;
+          history.replaceState(null, '', '#' + activeFile + '--' + a.dataset.toc);
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
     }
   }
 
@@ -272,13 +285,33 @@
   }
   backdrop.addEventListener('click', () => closeSidebar());
 
-  // deep-linking: #repo-analysis.md etc.
+  // deep-linking: #repo-analysis.md, #repo-analysis.md--security-incidents etc.
   window.addEventListener('hashchange', routeFromHash);
   function routeFromHash() {
-    const name = decodeURIComponent(location.hash.slice(1));
-    const doc = DOCS.find(d => d.file === name) || DOCS[0];
-    loadDoc(doc, false);
+    const raw = decodeURIComponent(location.hash.slice(1));
+    if (!raw) { loadDoc(DOCS[0], false); return; }
+    const sep = raw.indexOf('--');
+    const name = sep === -1 ? raw : raw.slice(0, sep);
+    const section = sep === -1 ? null : raw.slice(sep + 2);
+    const doc = DOCS.find(d => d.file === name);
+    if (!doc) {
+      // bare section id (old TOC links / manual #anchor): scroll in place, never reload the doc
+      const el = document.getElementById(raw);
+      if (el) el.scrollIntoView({ block: 'start' });
+      return;
+    }
+    const needLoad = activeFile !== doc.file || !cache[doc.file];
+    if (needLoad) {
+      loadDoc(doc, false).then(() => { if (section) scrollToSection(section); });
+    } else if (section) scrollToSection(section);
     setActive(doc.file);
+  }
+
+  function scrollToSection(id) {
+    requestAnimationFrame(() => {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ block: 'start' });
+    });
   }
 
   routeFromHash();

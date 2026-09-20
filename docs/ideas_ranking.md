@@ -20,7 +20,7 @@
 2. **Caching + Rate limiting** — Redis `cache-aside` + IP rate limiter. `roadmap.sh` lists it before queues. You have no Redis evidence. Add to `kaggle-automation` `/health` + `SlowAPI` like `GovAssist` does.
 3. **Auth + API security** — JWT/OAuth2, `12 Tips for API Security` `career.txt:240` (HTTPS, OAuth2, leveled keys, rate limit). Your `new-prince-hackathon` shipped JWT but never validated `repo-analysis.md:14`.
 4. **Testing + CI/CD beyond lint** — `fresher-must-have-skills-2026` 10-point checklist: pytest with fixtures, not just `hl` — `tamil-tokenizer` has 23 tests, `kaggle-automation` has 79 tests across 12 files + GH Actions (done Sep 5). Still missing: `tamil-tokenizer` CI.
-5. **Web server / Deploy** — Nginx reverse proxy, `docker-compose` healthcheck (your `moviemod-scraper` has one but 1639-line monolith). Tomorrow's `docker build` must pass, then `Render/Railway` live URL.
+5. **Web server / Deploy** — Nginx reverse proxy, `docker-compose` healthcheck (your `moviemod-scraper` has one; Sep 2026 refactor split the old monolith into `src/` + 71 tests). Tomorrow's `docker build` must pass, then `Render/Railway` live URL.
 
 *Don't touch yet:* GraphQL/gRPC, Kafka/RabbitMQ, Kubernetes — explicitly `Recruiter Bluff` for freshers `fresher-must-have-skills-2026.md:232`.
 
