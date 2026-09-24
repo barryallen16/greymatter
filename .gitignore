@@ -41,3 +41,11 @@ Grey Matter — Project Grey Matter.mhtml
 
 # Not required for Grey Matter deployment (analyzed in repo-analysis.md, not served)
 ats-resume-creation-skill/
+
+# ATS resume session artifacts dropped at repo root (PII, regenerated per app)
+Jayadithya_R_Resume.*
+resume_content.json
+job_description.txt
+strategy.txt
+changelog.txt
+gaps.txt
