@@ -107,6 +107,16 @@
     </div>
   </details>
 
+  <div id="noteModal" style="display:none" class="fixed inset-0 z-50 bg-black/80 p-4" onclick="if(event.target===this)closeNote()">
+    <div class="max-w-2xl mx-auto mt-[10vh] rounded-xl border border-zinc-700 bg-zinc-900 p-5 shadow-2xl">
+      <div class="flex items-center gap-3 mb-3">
+        <h3 id="noteTitle" class="text-sm font-semibold tracking-tight flex-1 min-w-0"></h3>
+        <button onclick="closeNote()" class="text-xs px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-300 hover:border-zinc-500 min-h-[40px]">Close</button>
+      </div>
+      <div id="noteBody" class="text-sm text-zinc-400 leading-relaxed whitespace-pre-line max-h-[60vh] overflow-auto"></div>
+    </div>
+  </div>
+
   <div id="viewer" style="display:none" class="fixed inset-0 z-50 bg-black/80 p-4" onclick="if(event.target===this)closeViewer()">
     <div class="max-w-3xl mx-auto h-full flex flex-col gap-2">
       <div class="flex items-center gap-2">
@@ -210,7 +220,7 @@ function renderList(){
           : `<span>follow up ${esc(a.followup)}</span>`) : ''}
       </div>
       ${a.notes ? `<p class="mt-2 text-xs leading-relaxed ${rejected ? 'text-zinc-600' : 'text-zinc-400'}">${esc(a.notes)}</p>` : ''}
-      ${(a.jd||a.strategy||a.gaps||a.changelog) ? `<details class="group mt-1"><summary class="cursor-pointer select-none mono text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors duration-150 flex items-center gap-1 min-h-[32px]"><span class="inline-block text-zinc-600 transition-transform duration-150 group-open:rotate-90">›</span>Notes${[a.jd,a.strategy,a.gaps,a.changelog].filter(Boolean).length>1 ? ' · '+[a.jd,a.strategy,a.gaps,a.changelog].filter(Boolean).length : ''}</summary><div class="mt-1 mb-1 space-y-2 text-xs leading-relaxed text-zinc-400">${a.jd ? `<div><div class="mono text-[10px] uppercase tracking-wider text-zinc-500">Job description</div><div class="whitespace-pre-line mt-0.5">${esc(a.jd)}</div></div>` : ''}${a.strategy ? `<div><div class="mono text-[10px] uppercase tracking-wider text-zinc-500">Strategy</div><div class="whitespace-pre-line mt-0.5">${esc(a.strategy)}</div></div>` : ''}${a.gaps ? `<div><div class="mono text-[10px] uppercase tracking-wider text-zinc-500">Gaps</div><div class="whitespace-pre-line mt-0.5">${esc(a.gaps)}</div></div>` : ''}${a.changelog ? `<div><div class="mono text-[10px] uppercase tracking-wider text-zinc-500">Change log</div><div class="whitespace-pre-line mt-0.5">${esc(a.changelog)}</div></div>` : ''}</div></details>` : ''}
+      ${(a.jd||a.strategy||a.gaps||a.changelog) ? `<div class="mt-2 flex flex-wrap gap-1.5">${a.jd ? `<button type="button" data-title="Job description" data-body="${esc(a.jd)}" onclick="showNote(this)" class="mono text-[11px] px-2.5 py-1.5 rounded-md border border-zinc-800 bg-zinc-950/50 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 transition-colors duration-150">Job description</button>` : ''}${a.strategy ? `<button type="button" data-title="Strategy" data-body="${esc(a.strategy)}" onclick="showNote(this)" class="mono text-[11px] px-2.5 py-1.5 rounded-md border border-zinc-800 bg-zinc-950/50 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 transition-colors duration-150">Strategy</button>` : ''}${a.gaps ? `<button type="button" data-title="Gaps" data-body="${esc(a.gaps)}" onclick="showNote(this)" class="mono text-[11px] px-2.5 py-1.5 rounded-md border border-zinc-800 bg-zinc-950/50 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 transition-colors duration-150">Gaps</button>` : ''}${a.changelog ? `<button type="button" data-title="Change log" data-body="${esc(a.changelog)}" onclick="showNote(this)" class="mono text-[11px] px-2.5 py-1.5 rounded-md border border-zinc-800 bg-zinc-950/50 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 transition-colors duration-150">Change log</button>` : ''}</div>` : ''}
       <div class="mt-auto pt-3 border-t border-zinc-800/60 flex flex-col gap-2">
         <select onchange="setStatus('${a.id}', this.value)" aria-label="Change status" class="w-full px-3 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-xs mono text-zinc-300 min-h-[44px] transition-colors duration-200 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20">
           ${STAGES.slice(1).map(s=>`<option value="${s.id}"${a.status===s.id ? ' selected' : ''}>${s.label}</option>`).join('')}
@@ -336,6 +346,9 @@ window.viewFile = async (n, dl='') => {
   }catch{ doc.innerHTML = '<p class="text-zinc-500">Preview failed — use Download.</p>'; }
 };
 window.closeViewer = () => { qs('#viewer').style.display = 'none'; qs('#viewerFrame').src = ''; qs('#viewerDoc').innerHTML = ''; };
+window.showNote = el => { qs('#noteTitle').textContent = el.dataset.title; qs('#noteBody').textContent = el.dataset.body; qs('#noteModal').style.display = ''; };
+window.closeNote = () => { qs('#noteModal').style.display = 'none'; };
+document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeNote(); closeViewer(); } });
 if(window.refreshIcons) refreshIcons(document.body);
 </script>
 </body>
