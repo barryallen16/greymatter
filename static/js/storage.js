@@ -35,6 +35,33 @@ async function storeSet(key, value) {
   return false;
 }
 
+// Merge rows edited in the browser onto a freshly re-read server array.
+// `base` = what this page loaded, `local` = what the user changed since,
+// `fresh` = what the server holds now. A full-array PUT from a stale page would
+// silently delete rows added by a push (tracker_push.py / job-filter publish.py)
+// and revert any field edited elsewhere, so only fields this page actually touched
+// are applied — plus rows added or deleted here.
+const EDIT_KEYS = ['status', 'link', 'type', 'followup', 'notes', 'created', 'jd', 'files'];
+
+function mergeRows(base, local, fresh) {
+  const out = Array.isArray(fresh) ? fresh.slice() : [];
+  const was = new Map((base || []).map(a => [a.id, a]));
+  const now = new Map((local || []).map(a => [a.id, a]));
+  for (const [id, a] of now) {
+    const server = out.find(x => x.id === id);
+    if (!server) { out.push({ ...a }); continue; }            // added on this device
+    const old = was.get(id);
+    for (const k of EDIT_KEYS)
+      if (!old || JSON.stringify(a[k]) !== JSON.stringify(old[k])) server[k] = a[k];
+  }
+  for (const [id] of was)                                     // deleted here
+    if (!now.has(id)) {
+      const i = out.findIndex(x => x.id === id);
+      if (i > -1) out.splice(i, 1);
+    }
+  return out;
+}
+
 async function storeDel(key) {
   try { await fetch('/api/store/' + encodeURIComponent(key), { method: 'DELETE' }); } catch {}
   try { localStorage.removeItem(key); } catch {}

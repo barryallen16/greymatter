@@ -154,7 +154,8 @@ let apps = [];
 let filter = 'all';
 const qs = s => document.querySelector(s);
 
-async function load(){ apps = await storeGet(KEY) || []; }
+let baseApps = [];
+async function load(){ apps = await storeGet(KEY) || []; baseApps = JSON.parse(JSON.stringify(apps)); }
 function setSaveState(state){
   qs('#saveState').textContent = state==='saving' ? 'saving…'
     : state==='ok' ? 'saved ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})
@@ -162,6 +163,11 @@ function setSaveState(state){
 }
 async function save(){
   setSaveState('saving');
+  // Re-read before writing: this page may have been open since a push added rows.
+  const fresh = await storeGet(KEY);
+  if(!Array.isArray(fresh)){ setSaveState('local'); return; }  // server unreachable — never blind-overwrite
+  apps = mergeRows(baseApps, apps, fresh);
+  baseApps = JSON.parse(JSON.stringify(apps));
   setSaveState(await storeSet(KEY, apps) ? 'ok' : 'local');
 }
 function esc(s){ return (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
