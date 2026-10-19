@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">Roadmap — Grey Matter</title>
+<link rel="stylesheet" href="../static/css/tailwind.css">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/css/fonts.css">
+<link rel="icon" href="../favicon/favicon.ico" type="image/x-icon" />
+<script src="../static/js/pixel-icons.js"></script>
+<script src="../static/js/storage.js"></script>
+<style>
+  *{font-family:"Geist",system-ui,sans-serif}
+  .mono{font-family:"Geist Mono",monospace}
+  .pixel{font-family:"GeistPixel","Geist",sans-serif;letter-spacing:-0.02em}
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-thumb{background:#27272a;border-radius:8px}
+  .tick{width:20px;height:20px;min-width:20px;accent-color:#10b981;touch-action:manipulation}
+  @media (pointer:coarse){.tick{width:26px;height:26px;min-width:26px}}
+  .tick:checked+span{text-decoration:line-through;opacity:0.55}
+  .progress{transition:width .3s ease}
+  html{-webkit-text-size-adjust:100%}
+  label{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  label:has(.tick){padding:6px 0;margin:-6px 0}
+  @media (prefers-reduced-motion:reduce){.progress{transition:none}}
+  @supports(padding:max(0px)){header{padding-top:max(0.5rem,env(safe-area-inset-top))}}
+  .badge{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+</style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 antialiased">
+<header class="sticky top-0 z-30 bg-zinc-950/90 backdrop-blur border-b border-zinc-800" style="padding-top:env(safe-area-inset-top);">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between gap-3 sm:gap-4">
+    <div class="min-w-0 flex-1">
+      <h1 class="text-base sm:text-lg font-bold truncate" id="hTitle">Roadmap</h1>
+      <p class="text-[11px] sm:text-xs text-zinc-500 mono truncate" id="hSub">Loading… · <span id="dateStr"></span> · <span id="saveState"></span></p>
+    </div>
+    <div class="text-right shrink-0">
+      <div class="text-sm font-semibold"><span id="doneCount">0</span>/<span id="totalCount">0</span></div>
+      <div class="w-24 sm:w-32 h-1.5 bg-zinc-800 rounded-full mt-1 overflow-hidden"><div id="progressBar" class="h-full bg-emerald-500 progress" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 pb-3 flex gap-2 overflow-x-auto scrollbar-none">
+    <button onclick="resetAll()" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px]">Reset</button>
+    <button onclick="exportMD()" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px]">Export .md</button>
+    <a href="./index.html" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px] flex items-center">All roadmaps</a>
+    <a href="../tracker/" class="shrink-0 text-xs px-4 py-2.5 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 min-h-[40px] flex items-center">Tracker</a>
+  </div>
+</header>
+<main class="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-5" id="main">
+  <div class="text-sm text-zinc-500 mono">Loading roadmap…</div>
+</main>
+<div id="toast" role="status" style="display:none;bottom:calc(1rem + env(safe-area-inset-bottom))" class="fixed left-1/2 -translate-x-1/2 z-50 max-w-[calc(100vw-2rem)] items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg"></div>
+<script>
+const qs = s => document.querySelector(s);
+const params = new URLSearchParams(location.search);
+const KEY = params.get('key') || 'roadmap-backend-30';
+const TICKS_KEY = KEY + '-ticks';
+const FALLBACK = params.get('file') || './examples/backend-30.json';
+let doc = null;
+let ticks = {};
+let baseTicks = {};
+
+function setSaveState(state){
+  const el = qs('#saveState');
+  if(el) el.textContent = state==='saving' ? 'saving…' : state==='ok' ? 'saved' : 'NOT saved — server unreachable';
+}
+
+async function loadDoc(){
+  // try API first
+  try {
+    const r = await fetch('/api/store/' + encodeURIComponent(KEY));
+    if(r.ok){ const v = await r.json(); if(v && typeof v === 'object' && v.phases) { doc = v; return; } }
+  } catch {}
+  // fallback to file
+  try {
+    const r = await fetch(FALLBACK);
+    if(r.ok){ doc = await r.json(); return; }
+  } catch {}
+  doc = null;
+}
+
+async function loadTicks(){
+  try {
+    const r = await fetch('/api/store/' + encodeURIComponent(TICKS_KEY));
+    if(r.ok){ const v = await r.json(); if(v && typeof v === 'object'){ ticks = v; baseTicks = JSON.parse(JSON.stringify(v)); return; } }
+  } catch {}
+  // localStorage fallback
+  try { const raw = localStorage.getItem(TICKS_KEY); if(raw){ ticks = JSON.parse(raw); baseTicks = JSON.parse(JSON.stringify(ticks)); } } catch {}
+}
+
+function esc(s){ return (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function render(){
+  if(!doc){ qs('#main').innerHTML = '<div class="text-sm text-red-400 mono">Roadmap not found. Seed it: PUT JSON to /api/store/' + esc(KEY) + '.</div>'; return; }
+  document.title = (doc.title || 'Roadmap') + ' — Grey Matter';
+  qs('#hTitle').textContent = (doc.date || '') + (doc.title ? ' · ' + doc.title : '');
+  qs('#hSub').innerHTML = esc(doc.subtitle || '') + ' · <span id="dateStr"></span> · <span id="saveState"></span>';
+  qs('#dateStr').textContent = new Date().toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'});
+
+  const checks = [];
+  let html = '';
+  if(doc.intro) html += `<section class="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5"><p class="text-sm">${esc(doc.intro)}</p></section>`;
+  html += '<section class="space-y-3">';
+  (doc.phases || []).forEach(ph => {
+    const color = ph.color || 'emerald';
+  const cm = {emerald:{bg:'#10b981',fg:'#000',ac:'#34d399'},blue:{bg:'#3b82f6',fg:'#fff',ac:'#60a5fa'},violet:{bg:'#8b5cf6',fg:'#fff',ac:'#a78bfa'},amber:{bg:'#f59e0b',fg:'#000',ac:'#fbbf24'}}[color] || {bg:'#10b981',fg:'#000',ac:'#34d399'};
+    html += `<div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <div class="flex gap-2 text-xs font-semibold mono"><span class="badge" style="background:${cm.bg};color:${cm.fg}">${esc(ph.name||'Phase')}</span> ${esc(ph.badge||'')} <span class="ml-auto" style="color:${cm.ac}">${ph.count|| (ph.tasks||[]).length} ticks</span></div>
+      <div class="space-y-2 mt-3">`;
+    (ph.tasks || []).forEach(t => {
+      const checked = ticks[t.id] ? 'checked' : '';
+      checks.push(t.id);
+      html += `<label class="flex gap-3 cursor-pointer"><input type="checkbox" class="tick mt-1" data-id="${esc(t.id)}" ${checked}><span class="text-sm">${t.html}</span></label>`;
+    });
+    html += '</div></div>';
+  });
+  html += '</section>';
+  if(doc.mvp){
+    const m = doc.mvp;
+    const checked = ticks[m.id] ? 'checked' : '';
+    checks.push(m.id);
+    html += `<section class="rounded-2xl border border-zinc-700 bg-zinc-800/30 p-4 text-center">
+      <p class="text-sm font-semibold">Minimum viable slice</p>
+      <label class="flex justify-center gap-2 mt-3 cursor-pointer"><input type="checkbox" class="tick" data-id="${esc(m.id)}" ${checked}><span class="text-sm">${m.html}</span></label>
+    </section>`;
+  }
+  if(Array.isArray(doc.if3) && doc.if3.length){
+    html += `<section class="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+      <h3 class="font-semibold text-sm">If you only do 3 things</h3>
+      <ol class="text-sm mt-2 space-y-1 list-decimal ml-5">${doc.if3.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
+    </section>`;
+  }
+  if(doc.sources) html += `<div class="text-center text-xs text-zinc-600 mono py-4">${esc(doc.sources)}</div>`;
+  if(doc.footer) html += `<div class="text-center text-xs text-zinc-600 mono py-2">${esc(doc.footer)}</div>`;
+  qs('#main').innerHTML = html;
+
+  const allChecks = qs('#main').querySelectorAll('.tick');
+  qs('#totalCount').textContent = allChecks.length;
+  updateProgress();
+  allChecks.forEach(c => c.addEventListener('change', () => { ticks[c.dataset.id] = c.checked; saveTicks(); updateProgress(); }));
+  if(window.refreshIcons) refreshIcons(document.body);
+}
+
+function updateProgress(){
+  const checks = [...qs('#main').querySelectorAll('.tick')];
+  const done = checks.filter(c=>c.checked).length;
+  qs('#doneCount').textContent = done;
+  qs('#progressBar').style.width = (checks.length ? done/checks.length*100 : 0) + '%';
+}
+
+async function saveTicks(){
+  setSaveState('saving');
+  baseTicks = JSON.parse(JSON.stringify(ticks));
+  const ok = await storeSet(TICKS_KEY, ticks);
+  setSaveState(ok ? 'ok' : 'local');
+  try { localStorage.setItem(TICKS_KEY, JSON.stringify(ticks)); } catch {}
+}
+
+function resetAll(){
+  const checks = [...qs('#main').querySelectorAll('.tick')];
+  if(!confirm('Reset all ticks for this roadmap?')) return;
+  checks.forEach(c => { ticks[c.dataset.id] = false; c.checked = false; });
+  storeDel(TICKS_KEY);
+  try { localStorage.removeItem(TICKS_KEY); } catch {}
+  ticks = {};
+  updateProgress();
+  setSaveState('ok');
+}
+
+function exportMD(){
+  if(!doc) return;
+  let md = '# ' + (doc.title||'Roadmap') + '\n\nProgress ' + qs('#doneCount').textContent + '/' + qs('#totalCount').textContent + '\n\n';
+  (doc.phases||[]).forEach(ph => {
+    md += '## ' + (ph.name||'') + ' — ' + (ph.badge||'') + '\n';
+    (ph.tasks||[]).forEach(t => {
+      const label = t.html.replace(/<[^>]+>/g,'');
+      md += '- [' + (ticks[t.id] ? 'x' : ' ') + '] ' + label + '\n';
+    });
+    md += '\n';
+  });
+  if(doc.mvp){ const m=doc.mvp; md += '- [' + (ticks[m.id]?'x':' ') + '] ' + m.html.replace(/<[^>]+>/g,'') + '\n'; }
+  const blob = new Blob([md],{type:'text/markdown'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (doc.date||'roadmap') + '.md'; a.click();
+}
+
+let toastTimer;
+function toast(msg, cls){
+  const el = qs('#toast');
+  el.className = `fixed left-1/2 -translate-x-1/2 z-50 max-w-[calc(100vw-2rem)] flex items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg ${cls || 'border-zinc-700 bg-zinc-900 text-zinc-100'}`;
+  el.innerHTML = `<span class="min-w-0 truncate">${msg}</span>`;
+  el.style.display = 'flex';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ el.style.display='none'; }, 3000);
+}
+
+(async () => {
+  await loadDoc();
+  await loadTicks();
+  render();
+})();
+if(window.refreshIcons) refreshIcons(document.body);
+</script>
+</body>
+</html>

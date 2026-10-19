@@ -1,0 +1,191 @@
+{
+  "title": "Backend 30 (Gov-scheme build)",
+  "subtitle": "Learn 30 backend topics by building",
+  "date": "2026-09-14",
+  "intro": "You learn the 30 backend topics by building the Gov-scheme recommender. Gate per phase: tests green + docker compose up green + one demoable endpoint.",
+  "phases": [
+    {
+      "name": "Phase 1",
+      "badge": "API skeleton — HTTP to REST",
+      "color": "emerald",
+      "count": 10,
+      "tasks": [
+        {
+          "id": "p1_skeleton",
+          "html": "<strong>HTTP + Routing:</strong> FastAPI app, routers/services split (<code class=\"mono text-xs bg-zinc-800 px-1 rounded\">routers/schemes.py</code>, <code class=\"mono text-xs bg-zinc-800 px-1 rounded\">services/</code>). Health route answers 200 with method + path logged."
+        },
+        {
+          "id": "p1_crud",
+          "html": "<strong>CRUD deep-dive:</strong> schemes table (SQLite first, Postgres in Phase 2) — create/read/update/delete + pagination (<code class=\"mono text-xs bg-zinc-800 px-1 rounded\">limit/offset</code>) + correct 200/201/400/404."
+        },
+        {
+          "id": "p1_serial",
+          "html": "<strong>Serialisation:</strong> Pydantic v2 request/response models, strict types, one 422 sample captured in a test."
+        },
+        {
+          "id": "p1_validation",
+          "html": "<strong>Validation + transformation:</strong> field validators normalize scheme payloads (trim, lowercase enums, date parse) — invalid input returns the error envelope, never 500."
+        },
+        {
+          "id": "p1_errors",
+          "html": "<strong>Error handling:</strong> global handler → <code class=\"mono text-xs bg-zinc-800 px-1 rounded\">{error:{code,message,request_id}}</code> for every failure path, tested."
+        },
+        {
+          "id": "p1_middleware",
+          "html": "<strong>Middlewares:</strong> request-ID + logging + CORS-locked-to-localhost, in that order. Explain why order matters."
+        },
+        {
+          "id": "p1_context",
+          "html": "<strong>Request context:</strong> request-scoped state via <code class=\"mono text-xs bg-zinc-800 px-1 rounded\">contextvar</code> (request_id, user) — no globals leaking between requests."
+        },
+        {
+          "id": "p1_auth",
+          "html": "<strong>Auth:</strong> login route issuing signed HttpOnly cookie (or JWT bearer); every mutating route gated; one 401 test + one 403 test."
+        },
+        {
+          "id": "p1_openapi",
+          "html": "<strong>REST + OpenAPI:</strong> resource naming pass, <code class=\"mono text-xs bg-zinc-800 px-1 rounded\">/docs</code> renders with summaries + examples for all routes."
+        },
+        {
+          "id": "p1_config",
+          "html": "<strong>Config mgmt (seed):</strong> <code class=\"mono text-xs bg-zinc-800 px-1 rounded\">.env.example</code> with every var documented; app refuses to boot with a clear message when required config is missing."
+        }
+      ]
+    },
+    {
+      "name": "Phase 2",
+      "badge": "Data + speed — DB, BLL, cache, search",
+      "color": "blue",
+      "count": 8,
+      "tasks": [
+        {
+          "id": "p2_postgres",
+          "html": "<strong>Databases:</strong> SQLite → Postgres in compose; one real migration; one B-Tree index justified in one sentence."
+        },
+        {
+          "id": "p2_explain",
+          "html": "<strong>DB depth:</strong> <code class=\"mono text-xs bg-zinc-800 px-1 rounded\">EXPLAIN ANALYZE</code> before/after the index on your slowest query — paste both outputs in the README."
+        },
+        {
+          "id": "p2_bll",
+          "html": "<strong>Business logic layer:</strong> eligibility engine returning <code class=\"mono text-xs bg-zinc-800 px-1 rounded\">eligible / needs_info / failed</code> — rules are source of truth, LLM never overrides. Missing-age test included."
+        },
+        {
+          "id": "p2_cache",
+          "html": "<strong>Caching:</strong> Redis cache-aside on scheme lookups with TTL + explicit invalidation on update. Hit/miss visible in logs."
+        },
+        {
+          "id": "p2_ratelimit",
+          "html": "<strong>Rate limiting:</strong> IP-based limit on eligibility endpoint; 429 body matches the error envelope."
+        },
+        {
+          "id": "p2_search",
+          "html": "<strong>Elasticsearch:</strong> hybrid keyword + vector search over schemes (Meilisearch acceptable if ES is heavy) — 5 seeded queries return the right scheme top-1."
+        },
+        {
+          "id": "p2_eval",
+          "html": "<strong>Testing + quality:</strong> suite at 15+ tests (CRUD, BLL states, cache, search, auth) + <code class=\"mono text-xs bg-zinc-800 px-1 rounded\">ruff</code> clean in CI."
+        },
+        {
+          "id": "p2_gate",
+          "html": "<strong>Phase gate:</strong> <code class=\"mono text-xs bg-zinc-800 px-1 rounded\">pytest</code> green + compose green + eligibility endpoint demoed to one human."
+        }
+      ]
+    },
+    {
+      "name": "Phase 3",
+      "badge": "Async + files + outside world",
+      "color": "violet",
+      "count": 9,
+      "tasks": [
+        {
+          "id": "p3_queue",
+          "html": "<strong>Task queuing + scheduling:</strong> Redis-backed queue (arq/dramatiq, no Kafka) — ingestion job enqueues, worker consumes, status pollable."
+        },
+        {
+          "id": "p3_resume",
+          "html": "<strong>Checkpoint resume:</strong> ingestion worker pulls last checkpoint → resume, miss → fresh start (your <code class=\"mono text-xs bg-zinc-800 px-1 rounded\">[RESUME] pulling checkpoint-9590</code> pattern). Kill mid-run once to prove it."
+        },
+        {
+          "id": "p3_storage",
+          "html": "<strong>Object storage + large files:</strong> scheme PDFs in S3-compatible store; downloads streamed from disk, never buffered in RAM."
+        },
+        {
+          "id": "p3_email",
+          "html": "<strong>Transactional emails:</strong> eligibility report email via SMTP/API with queued retry + one failure-path test."
+        },
+        {
+          "id": "p3_webhook",
+          "html": "<strong>Webhooks:</strong> signed inbound re-index webhook (HMAC verify, timestamp skew check) + one forged-signature rejection test."
+        },
+        {
+          "id": "p3_realtime",
+          "html": "<strong>Real-time:</strong> SSE streaming of eligibility answers; reconnect resumes without duplicates."
+        },
+        {
+          "id": "p3_concurrency",
+          "html": "<strong>Concurrency + parallelism:</strong> caps on parallel fetches/parses (kaggle's OOM-throttle lesson); document the number and why."
+        },
+        {
+          "id": "p3_errors",
+          "html": "<strong>Failure drills:</strong> worker crash, webhook forgery, storage miss — each returns the envelope + alert, each covered by a test."
+        },
+        {
+          "id": "p3_gate",
+          "html": "<strong>Phase gate:</strong> kill -9 the worker mid-ingest → restart resumes from checkpoint, zero duplicate emails sent."
+        }
+      ]
+    },
+    {
+      "name": "Phase 4",
+      "badge": "Production hardening",
+      "color": "amber",
+      "count": 8,
+      "tasks": [
+        {
+          "id": "p4_logging",
+          "html": "<strong>Logging, monitoring, observability:</strong> structured JSON logs with request_id + <code class=\"mono text-xs bg-zinc-800 px-1 rounded\">/health</code> + one latency metric. Diagnose one slow request from logs alone."
+        },
+        {
+          "id": "p4_shutdown",
+          "html": "<strong>Graceful shutdown:</strong> lifespan handler drains queue + closes pools; in-flight request finishes, new ones get 503 during drain."
+        },
+        {
+          "id": "p4_security",
+          "html": "<strong>Security:</strong> headers pass, secrets only via env, auth rotate tested, dependency audit run once."
+        },
+        {
+          "id": "p4_scale",
+          "html": "<strong>Scaling + performance:</strong> state what breaks first at 1k rps (pool? cache? worker?) + the one fix you'd apply first."
+        },
+        {
+          "id": "p4_12factor",
+          "html": "<strong>12-factor pass:</strong> env-only config, stateless app, logs to stdout, backing services attached as resources — checklist in README."
+        },
+        {
+          "id": "p4_docker",
+          "html": "<strong>DevOps:</strong> multi-stage Dockerfile + compose (api/postgres/redis/search) + pinned CI running <code class=\"mono text-xs bg-zinc-800 px-1 rounded\">ruff</code> + <code class=\"mono text-xs bg-zinc-800 px-1 rounded\">pytest</code> on push."
+        },
+        {
+          "id": "p4_live",
+          "html": "<strong>Live URL + README:</strong> deployed link + arch diagram + <code class=\"mono text-xs bg-zinc-800 px-1 rounded\">EXPLAIN</code> outputs + interview answer for \"missing age field without guessing?\""
+        },
+        {
+          "id": "p4_gate",
+          "html": "<strong>Final gate:</strong> fresh clone → <code class=\"mono text-xs bg-zinc-800 px-1 rounded\">docker compose up</code> → full suite green → eligibility + search demoed end-to-end."
+        }
+      ]
+    }
+  ],
+  "mvp": {
+    "id": "mvp",
+    "html": "MVP checked"
+  },
+  "if3": [
+    "Phase 1 skeleton + schemes CRUD + error envelope — the foundation everything plugs into",
+    "Phase 2 eligibility BLL with eligible / needs_info / failed + one Redis cache",
+    "Phase 3 checkpoint-resume ingestion worker — kill it mid-run and watch it resume"
+  ],
+  "sources": "Topic source: your 30-item backend list. Project source: docs · ideas.md Tier S #1. Layering reference: kaggle-automation (mirror shape, not code).",
+  "footer": "You build the project — this page only tracks it. One phase at a time."
+}

@@ -44,7 +44,9 @@ ats-resume-creation-skill/
 
 # ATS resume session artifacts dropped at repo root (PII, regenerated per app)
 Jayadithya_R_Resume.*
+Jayadithya_R_Master_Resume.*
 resume_content.json
+resume_content_master.json
 job_description.txt
 strategy.txt
 changelog.txt
