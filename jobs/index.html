@@ -51,7 +51,7 @@
 
   <div id="empty" style="display:none" class="text-center py-14 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/30">
     <div class="pixel text-2xl">no jobs yet</div>
-    <p class="mono text-xs text-zinc-500 mt-1">Run <code class="text-zinc-400">uv run python publish.py</code> from job-filter to publish the ranked list here.</p>
+    <p class="mono text-xs text-zinc-500 mt-1">Publish from <code class="text-zinc-400">job-filter/publish.py</code> or <code class="text-zinc-400">scrape/publish.py</code> to fill this list.</p>
   </div>
 
   <div class="mt-8 text-xs text-zinc-600 mono flex gap-2">
@@ -64,10 +64,11 @@
 <div id="toast" role="status" style="display:none;bottom:calc(1rem + env(safe-area-inset-bottom))" class="fixed left-1/2 -translate-x-1/2 z-50 max-w-[calc(100vw-2rem)] items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg"></div>
 
 <script>
-// Ranked list published by job-filter to the Grey Matter KV store (key below).
+// Ranked list published by job-filter + the fresher matches published by scrape/publish.py.
 // Shortlisting here writes the SAME row the resume skill's tracker_push.py updates:
 // rows are matched on canonical (company, role), exactly like job-filter/publish.py.
-const KEY_JOBS = 'jobfilter-jobs-v1';
+const KEY_JOBS = 'jobfilter-jobs-v1';     // job-filter/publish.py
+const KEY_SCRAPE = 'jobscrape-jobs-v1';   // scrape/publish.py
 const KEY_TRACKER = 'tracker-apps-v1';
 const TYPES = [{id:'all',label:'All'},{id:'fulltime',label:'Full-time'},{id:'intern',label:'Intern'}];
 let jobs = [];
@@ -80,6 +81,8 @@ const STOP_CO = new Set(['pvt','private','ltd','limited','llp','inc','co','corp'
 const STOP_TI = new Set(['hiring','for','job','openings','urgent','the','a','an','role','position']);
 const canon = (s, stop) => (s || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w && !stop.has(w)).join(' ');
 const jobKey = (c, r) => canon(c, STOP_CO) + '::' + canon(r, STOP_TI);
+// tracker row id per feeder: job-filter publishes jf-<id>, the scrape pipeline js-<id>
+const rowPrefix = j => (j.source_type === 'scrape' ? 'js-' : 'jf-');
 
 function esc(s){ return (s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 const fmtDate = ts => { try { return new Date(ts).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}); } catch { return ''; } };
@@ -111,10 +114,12 @@ function toast(msg, cls){
 
 async function load(){
   qs('#saveState').textContent = 'loading…';
-  jobs = await storeGet(KEY_JOBS) || [];
-  tracked = await storeGet(KEY_TRACKER) || [];
-  if (!Array.isArray(jobs)) jobs = [];
-  if (!Array.isArray(tracked)) tracked = [];
+  const [ranked, scraped, rows] = await Promise.all([
+    storeGet(KEY_JOBS), storeGet(KEY_SCRAPE), storeGet(KEY_TRACKER),
+  ]);
+  // job-filter's ranked list first, then the fresher matches the scrape pipeline publishes
+  jobs = [...(Array.isArray(ranked) ? ranked : []), ...(Array.isArray(scraped) ? scraped : [])];
+  tracked = Array.isArray(rows) ? rows : [];
   qs('#saveState').textContent = jobs.length ? 'from server' : 'nothing published';
   renderTypes();
   render();
@@ -142,7 +147,7 @@ function visible(){
 
 function trackedRow(j){
   const key = jobKey(j.company, j.title);
-  return tracked.find(r => r.id === 'jf-' + j.id || jobKey(r.company || '', r.role || '') === key);
+  return tracked.find(r => r.id === rowPrefix(j) + j.id || jobKey(r.company || '', r.role || '') === key);
 }
 
 function render(){
@@ -171,7 +176,7 @@ function render(){
             ${j.description ? `<details class="w-full mt-1"><summary class="cursor-pointer text-zinc-500">Job description</summary><div class="text-zinc-400 whitespace-pre-line">${esc(j.description)}</div></details>` : ''}
           </div>
         </div>
-        <span class="mono text-[11px] px-2 py-0.5 rounded-full border shrink-0 bg-blue-500/15 text-blue-300 border-blue-500/20">${j.score ?? 0}</span>
+        <span class="mono text-[11px] px-2 py-0.5 rounded-full border shrink-0 bg-blue-500/15 text-blue-300 border-blue-500/20" title="${j.tier ? 'tier ' + j.tier + ' · profile skill hits' : 'job-filter score'}">${j.tier ? j.tier + ' ' : ''}${j.score ?? 0}</span>
       </div>
       <div class="flex gap-2 mt-3 flex-wrap">
         ${j.job_url ? `<a href="${esc(j.job_url)}" target="_blank" rel="noopener noreferrer" class="shrink-0 px-4 py-2 rounded-xl bg-white text-black text-xs font-semibold hover:bg-zinc-200 flex items-center gap-2 min-h-[44px]"><i data-lucide="external-link" class="w-4 h-4"></i> Open</a>` : ''}
@@ -186,9 +191,10 @@ function render(){
 
 function buildEntry(j){
   const reasons = (j.match_reasons || []).slice(0, 6).join(', ');
-  const note = ('job-filter ' + (j.score ?? 0) + (reasons ? ' · ' + reasons : '')).slice(0, 200);
+  const head = j.source_type === 'scrape' ? 'scrape ' + (j.site || '') : 'job-filter ' + (j.score ?? 0);
+  const note = (head + (reasons ? ' · ' + reasons : '')).slice(0, 200);
   return {
-    id: 'jf-' + j.id,
+    id: rowPrefix(j) + j.id,
     company: j.company,
     role: j.title,
     link: j.job_url || '',
