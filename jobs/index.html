@@ -70,7 +70,7 @@
 const KEY_JOBS = 'jobfilter-jobs-v1';     // job-filter/publish.py
 const KEY_SCRAPE = 'jobscrape-jobs-v1';   // scrape/publish.py
 const KEY_TRACKER = 'tracker-apps-v1';
-const TYPES = [{id:'all',label:'All'},{id:'fulltime',label:'Full-time'},{id:'intern',label:'Intern'}];
+const TYPES = [{id:'all',label:'All'},{id:'fulltime',label:'Full-time'},{id:'intern',label:'Intern'},{id:'scraped',label:'Scraped'}];
 let jobs = [];
 let tracked = [];
 let typeFilter = 'all';
@@ -139,7 +139,9 @@ function visible(){
     if (j.judge === 'drop') return false;
     // Apply-now list: hide any stated band that needs experience.
     if ((j.min_exp_years ?? 0) > 0 || (j.max_exp_years ?? 0) > 3) return false;
-    if (typeFilter !== 'all' && (j.job_type || 'fulltime') !== typeFilter) return false;
+    if (typeFilter === 'scraped') {          // the whole scrape feed, whatever its job type
+      if (j.source_type !== 'scrape') return false;
+    } else if (typeFilter !== 'all' && (j.job_type || 'fulltime') !== typeFilter) return false;
     if (!q) return true;
     return `${j.title} ${j.company} ${j.location}`.toLowerCase().includes(q);
   });
@@ -168,6 +170,7 @@ function render(){
             <span class="text-zinc-400">${esc(j.company)}</span>
             <span>${esc(j.location || '—')}</span>
             <span>${esc(j.site || '')}</span>
+            ${j.source_type === 'scrape' ? `<span class="${PILL} bg-zinc-800 text-zinc-400 border-zinc-800" title="published by scrape/publish.py">scraped</span>` : ''}
             ${fitBadge(j)}
             ${(j.job_type === 'intern') ? '<span class="text-amber-400/90">intern</span>' : ''}
             ${posted ? `<span>${fmtDate(posted)}</span>` : ''}
