@@ -1,6 +1,6 @@
 # Grey Matter — phone + laptop, from anywhere (VPS)
 
-Static site: **Docs** (`/`) + **Roadmaps** (`/roadmaps/`) + **Archive** (`/archive/` 5340 items) + **Tracker** (`/tracker/`) + **Jobs** (`/jobs/`). Tickboxes and the tracker work on the phone; state persists in the tiny stdlib KV API (`api/`, `localStorage` fallback when it's unreachable).
+Static site: **Docs** (`/`) + **Roadmaps** (`/roadmaps/`) + **Archive** (`/archive/` 5340 items) + **Tracker** (`/tracker/`) + **Jobs** (`/jobs/`) + **Scrape** (`/scrape/`). Tickboxes and the tracker work on the phone; state persists in the tiny stdlib KV API (`api/`, `localStorage` fallback when it's unreachable).
 
 **Fonts:** Geist + Geist Mono + Geist Pixel (`pixel` headlines, `mono` code). Loaded via Google Fonts + local `/static/fonts/*.ttf` (`/static/css/fonts.css` `GeistPixel` alias, `font-display: swap`). **Tailwind:** local `/static/css/tailwind.css` (built via `npm run build:css`, no CDN).
 
@@ -27,6 +27,15 @@ uv run python publish.py --url https://greymatter.isroot.in    # push matches to
 ```
 
 `scrape/profile.json` (PII) and `scrape/data/` (SQLite) stay local — both are gitignored. `scrape/daily.bat` runs the pipeline and publishes at 08:30.
+
+## Scrape page (`/scrape/`)
+
+The pipeline's own pixel-art report UI (tier cards, Apply/Pitch/★/✓/✕, IITM Startups tab) — every job ever seen, not just today's matches. It is **not** in git: `daily.bat` uploads the generated `scrape/report.html` over scp to `~/greymatter/scrape-page/index.html` on the VPS, and `docker-compose.yml` mounts that folder read-only at `/scrape/`. Regenerate + re-upload by hand:
+
+```bash
+cd scrape && uv run run.py --open
+ssh partha "mkdir -p ~/greymatter/scrape-page" && scp report.html partha:greymatter/scrape-page/index.html
+```
 
 ## VPS deploy (1 command)
 

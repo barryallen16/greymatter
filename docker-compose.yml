@@ -22,6 +22,8 @@ services:
     volumes:
       # thumbs are build artifacts (not in git) — scp once, served without rebuild
       - ./archive/thumbs:/usr/share/nginx/html/archive/thumbs:ro
+      # the scrape pipeline's report.html (scp'd by scrape/daily.bat) — served at /scrape/
+      - ./scrape-page:/usr/share/nginx/html/scrape:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./certbot-www:/var/www/certbot:ro
     healthcheck:
