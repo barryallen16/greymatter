@@ -14,6 +14,20 @@ python -m http.server 8000
 
 `docs/index.html` fetches `../*.md` via `fetch()` — it **must** be served over HTTP (fails on `file://`). The error card explains this.
 
+## Jobs page (`/jobs/`)
+
+Two feeders publish into the hub's KV store; the page merges them and both support **Add to tracker**:
+
+- `job-filter/publish.py` → `jobfilter-jobs-v1` (ranked list, tracker rows `jf-*`)
+- `scrape/publish.py` → `jobscrape-jobs-v1` (fresher matches, tracker rows `js-*`)
+
+```bash
+cd scrape && uv run run.py --open                              # scrape + write report.md
+uv run python publish.py --url https://greymatter.isroot.in    # push matches to /jobs/
+```
+
+`scrape/profile.json` (PII) and `scrape/data/` (SQLite) stay local — both are gitignored. `scrape/daily.bat` runs the pipeline and publishes at 08:30.
+
 ## VPS deploy (1 command)
 
 ```bash

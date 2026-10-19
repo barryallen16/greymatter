@@ -6,6 +6,7 @@ Static site + tiny stdlib Python API + resume skill. Read this before doing anyt
 
 - `tracker/` — job application tracker (the interactive app).
 - `jobs/` — ranked job list published by the separate **job-filter** project; reads KV key `jobfilter-jobs-v1`, and "Add to tracker" writes `tracker-apps-v1` using the same canonical (company, role) upsert as `publish.py`.
+- `scrape/` — fresher job pipeline (moved in from the `job-scrape` repo, Oct 2026): 10 sources → SQLite `scrape/data/jobs.db` → fresher/location gates → tier A/B/C keyword scoring → `report.md`. Publishes KV key `jobscrape-jobs-v1`, which the same `/jobs/` page renders. `profile.json`, `data/`, `report.*` and logs are gitignored. Run `cd scrape && uv run run.py --open`; publish `uv run python publish.py --url https://greymatter.isroot.in`.
 - `api/main.py` — stdlib-only HTTP API: SQLite KV + PDF/DOCX file store. Runtime data in `api/data/` (gitignored, VPS volume — never commit).
 - `docs/` — markdown notes + viewer (`docs/index.html` fetches `./<file>`).
 - `roadmaps/`, `archive/` — roadmap pages; archive is a 5340-item viewer over root `results.enriched.jsonl` (keep both `results*.jsonl` at root — viewer and enrich script expect them there).
@@ -41,9 +42,10 @@ Base: local `http://127.0.0.1:8080` (`PORT=8080 uv run python api/main.py`), pro
 `job-filter` is a separate repo (`~/Desktop/job-filter`) that scrapes boards + GCC career pages and ranks jobs. It publishes here so the list is readable on the phone:
 
 - KV key `jobfilter-jobs-v1` — scored jobs: `{id, title, company, location, job_url, site, source_type, description, score, match_reasons[], min_exp_years, max_exp_years, job_type, date_posted, discovered_at, judge?, judge_reason?}` (`date_posted` = true posted date where a source gives one, else `""`; `judge: "drop"` = the `/job-judge` skill's verdict from `job-filter/data/verdicts.json`, hidden by the page). The jobs page is an apply-now list: it hides judge-drops and any stated band not starting at 0, falls back to `discovered_at` for dates, badges 24h rows NEW, and colors the rest (`fresher fit` / `exp unstated`). The `engine/scorer.py` gate stays wider (keeps 1–3 bands in the DB); the page just doesn't show them. Written by `job-filter/publish.py`, rendered by `jobs/index.html`.
-- KV key `tracker-apps-v1` — `publish.py` merges the **shortlisted** jobs in as `saved` rows with id `jf-<job-filter id>`.
+- KV key `jobscrape-jobs-v1` — the fresher pipeline's top matches: same row shape plus `tier: "A"|"B"` and `source_type: "scrape"`, `min/max_exp_years` null (the pipeline's fresher gate already ran). Selection is report.md's locked rule: tier A always, tier B needs ≥3 profile keywords, >14 days stale dropped, top 20 after dedupe by (company, title). The page appends these after the job-filter rows and shows the tier in the score pill. Written by `scrape/publish.py`. Kept in its **own** key on purpose — `job-filter/publish.py` replaces its key wholesale, so sharing one would delete these rows on every re-run.
+- KV key `tracker-apps-v1` — `publish.py` merges the **shortlisted** jobs in as `saved` rows with id `jf-<job-filter id>`; "Add to tracker" on a scraped row writes `js-<source>:<ext_id>`.
 
-**Identity rule — the one thing that must not drift.** Rows are matched on canonical (company, role): `canon(company, STOP_CO) + canon(role, STOP_TI)`. That rule is mirrored in three places — `job-filter/publish.py`, `jobs/index.html` (JS), and `ats-resume-creation-skill/scripts/tracker_push.py`. Change one and the resume skill starts adding a duplicate row for a posting that is already tracked.
+**Identity rule — the one thing that must not drift.** Rows are matched on canonical (company, role): `canon(company, STOP_CO) + canon(role, STOP_TI)`. That rule is mirrored in three places — `job-filter/publish.py`, `jobs/index.html` (JS), and `ats-resume-creation-skill/scripts/tracker_push.py` — so a scraped posting that is already tracked links to the existing row instead of adding a second one. Change one and the resume skill starts duplicating postings that are already tracked.
 
 Publishing is **additive**: `status`, `type`, `followup`, `files` and any note or link edited on the phone are never overwritten by a re-run.
 
@@ -51,6 +53,9 @@ Publishing is **additive**: `status`, `type`, `followup`, `files` and any note o
 cd ~/Desktop/job-filter
 uv run python publish.py                                      # local API
 uv run python publish.py --url https://greymatter.isroot.in   # VPS
+
+cd scrape   # fresher pipeline (daily.bat runs this at 08:30)
+uv run python publish.py --url https://greymatter.isroot.in
 ```
 
 ## Resume skill → tracker (Hermes or any agent)
