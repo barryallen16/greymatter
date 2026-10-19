@@ -24,3 +24,5 @@ roadmaps/*.tmp
 *.log
 all-screenshots.zip
 ats-resume-creation-skill/
+# Fresher pipeline runs on the laptop; scrape/profile.json + scrape/data/ carry PII
+scrape/
